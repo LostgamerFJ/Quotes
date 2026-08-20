@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head> <!--info about website-->
+        <title>My First Website</title> <!--Title in Tab-->
+        <link rel="icon" type="image/png" href="assets/images/logo-full.png">
+    </head>
+    <body> <!--what you see-->
+        <h1>This is an h1 heading</h1> <!--different header sizes-->
+        <h2>This is an h2 heading</h2>
+        <h3>This is an h3 heading</h3>
+        <h4>This is an h4 heading</h4>
+        <h5>This is an h5 heading</h5>
+        <hr> <!--horisontal Line-->
+        <h1><span style="background-color:tomato">This is a span title</span></h1>
+        <h1><div style="background-color:lightskyblue">This is a div title</div></h1>
+        <hr>
+        <br> <!--line brak-->
+        <p>This is normal Text</p> <!--paragraph (seperated through line Breaks, doesn't care how text is formatted in programm)-->
+        <p>This is <b>bold</b> Text</p>
+        <p>This is <i>italic</i> Text</p>
+        <p>This is <u>underlined</u> Text</p>
+        <p>This is <del>deleted</del> Text</p>
+        <p>This is <big>big</big> Text</p>
+        <p>This is <small>small</small> Text</p>
+        <p>This is <sub>subscript</sub> Text</p>
+        <p>This is <sup>superscript</sup> Text</p>
+        <p>This is <tt>monospaced</tt> Text</p>
+        <p>This is <mark style="background-color: lightgreen;">marked</mark> Text</p>
+
+        <pre> <!--preformated paragraph (seperated through line Breaks, cares how text is formatted in programm (indents too))-->
+        This is a paragraph,
+        which cares about fromatting in the programm
+        </pre>
+
+        <a href="lyrics.html"  
+        target="_blank" 
+        title="Rickroll Yourself">
+        click me
+        </a> <!--a = anchor; href= link; target: how to open link; title: tooltip; insinde a brackets: can be text, video, img, etc.-->
+
+        <br>
+
+        <a href="mailto: test@fake.com">
+            mailme
+        </a>
+
+        <br>
+        <a href="https://vitronis.de/">
+        <img src="assets/images/logo-icon.png"
+        height="200"
+        width="600"
+        alt="dämliches Logo">
+        </a>
+
+        <img src="assets/images/birb.gif">
+
+        <ul> <!--unordered List-->
+            <li>milk</li>
+            <li>breaks</li>
+            <li>eggs</li>
+            <li>coffe supplies</li>
+            <ul>
+                <li>coffe beans</li>
+            </ul>
+        </ul>
+
+        <ol> <!--ordered List-->
+            <li>eat dinner</li>
+            <li>game</li>
+        </ol>
+
+        <dl> <!--description list-->
+            <dt>dragon</dt>
+            <dd>a mythical monster resembling a giant reptile, sometimes featuring wings</dd>
+        </dl>
+
+        <table border="1"> 
+            <tr> <!--table row-->
+                <th> <!--table header-->
+                    This is the header
+                </th>
+            </tr>
+            <tr>
+                <td> <!--table data-->
+                    this is an entry
+                </td>
+            </tr>
+        </table>
+
+        <button onclick="doSomething()" style="font-size:25px; background-color: cyan;">clickme</button>
+        <script>
+            function doSomething(){
+                document.getElementById("test").innerHTML = "bye"
+            }
+        </script>
+
+        <p id="test">servus</p>
+
+        <form action="index.php" method="post">
+
+            <label for="username">username:</label>
+            <input type="text" id="username" placeholder="Username" minlength="6" maxlength="15" required>
+
+            <input type="reset">
+
+            <input type="submit">
+
+        </form>
+    </body>
+</html>
