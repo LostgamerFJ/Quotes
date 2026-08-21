@@ -6,12 +6,12 @@ export class Person {
     tag;
     pic;
 
-    constructor(PID, FIRSTNAME, LASTNAME, TAG, PIC = null){
+    constructor(PID, FIRSTNAME, LASTNAME, TAG, PIC = "./Portrait_Placeholder.png"){
         this.pID = PID;
         this.firstName = FIRSTNAME;
         this.lastName = LASTNAME;
         this.tag = TAG;
-        this.pic = PIC;
+        this.pic.src = PIC;
     }
 
     changePic(picPath) {
