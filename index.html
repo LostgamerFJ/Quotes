@@ -23,11 +23,45 @@
             <p>Test</p>
         </div>
 
-        <button>neues Zitat</button>
+        <button id="openBtn">Neues Zitat</button>
 
-        <button onclick="SaveAll">Speichern</button>
+        <div class="overlay" id="overlay">
+            <div class="modal">
+                <h2>Neues Zitat</h2>
+        
+                <div class="field-row">
+                    <div class="field">
+                        <label for="Person">Person</label>
+                        <select id="Person"></select>
+                    </div>
+                    <div class="field">
+                        <label for="Notes">Notiz</label>
+                        <input type="text" id="Notes" placeholder="Optional">
+                    </div>
+                    <div class="field">
+                        <label for="Quote">Zitat</label>
+                        <input type="text" id="Quote">
+                    </div>
+                    <div class="field">
+                        <label for="Context">Kontext</label>
+                        <input type="text" id="Context" placeholder="Optional">
+                    </div>
+                </div>
+        
+                <div class="left-action">
+                    <button class="btn-secondary" id="extraFieldBtn">+ Weitere Zeile</button>
+                </div>
+        
+                <div class="modal-footer">
+                    <button class="btn-close-x" id="closeXBtn" aria-label="Schließen">Abbrechen</button>
+                    <button class="btn-primary" id="saveBtn">Speichern</button>
+                </div>
+            </div>
+        </div>
 
-        <script src="app.js"></script>        
+        <button id="saveAllBtn">Speichern</button>
+
+        <script type="module" src="app.js"></script>        
     </body>
 
 </html>
