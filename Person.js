@@ -1,22 +1,20 @@
 export class Person {
 
-    pID;
-    firstName;
-    lastName;
-    tag;
-    pic;
-
-    constructor(PID, FIRSTNAME, LASTNAME, TAG, PIC = "./Portrait_Placeholder.png"){
-        this.pID = PID;
-        this.firstName = FIRSTNAME;
-        this.lastName = LASTNAME;
-        this.tag = TAG;
-        this.pic.src = PIC;
+    constructor(ID, SALUTATION = null, FIRSTNAME = null, LASTNAME, TAG, PICURL = "./Portrait_Placeholder.png"){
+        let id = ID;
+        let salutation = SALUTATION;
+        let firstName = FIRSTNAME;
+        let lastName = LASTNAME;
+        let tag = TAG;
+        let picUrl = PICURL;
     }
 
     changePic(picPath) {
-        this.pic = new Image();
-        this.pic.src = picPath;
+        picUrl = picPath;
+    }
+
+    static fromJSON(obj){
+        return new Person(obj.id, obj.salutation, obj.firstName, obj.lastName, obj.tag, obj.picUrl)
     }
 
 }

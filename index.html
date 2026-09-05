@@ -3,15 +3,31 @@
     <head>
         <title>Zitate</title>
         <link rel="icon" type="image/png" href="assets/Icon.png">
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1><u>Lehrer:</u></h1>
+    <!--
+    <h1><u>Lehrer:</u></h1>
         <table id="lehrerZitate">
             <tr>
                 <td>Herr Klumpner:</td>
                 <td>"Test"</td>
             </tr>
         </table>
-        <script src="app.js"></script>
+    -->
+
+        <button type="button" class="collapsible">
+            <img src="./assets/Portrait_Placeholder.png" height="50">
+        </button>
+        <div class="content">
+            <p>Test</p>
+        </div>
+
+        <button>neues Zitat</button>
+
+        <button onclick="SaveAll">Speichern</button>
+
+        <script src="app.js"></script>        
     </body>
+
 </html>
