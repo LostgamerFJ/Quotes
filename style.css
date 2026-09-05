@@ -1,3 +1,9 @@
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh;
+    margin: 0;
+}
+
 .content{
     padding: 0 18px;
     background-color: white;
@@ -58,7 +64,7 @@
 
 .popup {
     background: white;
-    width: 480px;
+    width: 600px;
     max-width: 90vw;
     border-radius: 12px;
     padding: 28px;
@@ -91,6 +97,11 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 14px;
+    background: #fcf0d6;
+}
+.field:has(#Quote) {
+    flex: 10;
+    background: red;
 }
 .field input:focus {
     outline: 2px solid var(--teal);
@@ -119,9 +130,7 @@
 }
 .btn-primary {
     padding: 10px 20px;
-    background: var(--teal);
-    color: white;
-    border: none;
+    background: white;
     border-radius: 6px;
     font-size: 14px;
     cursor: pointer;
@@ -129,11 +138,11 @@
 .btn-primary:hover { background: var(--teal-dark); }
 
 .btn-close-x {
-    width: 38px;
+    width: 90px;
     height: 38px;
     border-radius: 6px;
     border: 1px solid var(--border);
-    background: white;
+    background: #c7c7c7;;
     color: var(--text-muted);
     font-size: 16px;
     cursor: pointer;
