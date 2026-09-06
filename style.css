@@ -154,7 +154,7 @@ body {
 
 .person-dropdown {
     position: relative;
-    width: 220px;
+    width: 100%;
 }
 
 .person-dropdown-toggle {

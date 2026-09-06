@@ -169,7 +169,11 @@ extraFieldBtn.addEventListener('click', () => {
 });
 
 async function init() {
-    await getAll();
+    try {
+        await getAll();
+    } catch (err) {
+        console.error('Konnte Daten nicht laden:', err);
+    }
 
     const firstRowSlot = document.getElementById('personSlot');
     mountPersonDropdown('', firstRowSlot);
