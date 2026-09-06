@@ -145,17 +145,17 @@ extraFieldBtn.addEventListener('click', () => {
             <label>Person</label>
             <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
         </div>
-        <div class="field">
+        <div class="field field-notes">
             <label for="Notes${lineCount}">Notiz</label>
-            <input type="text" id="Notes${lineCount}" placeholder="Optional">
+            <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
         </div>
         <div class="field field-quote">
             <label for="Quote${lineCount}">Zitat</label>
-            <input type="text" id="Quote${lineCount}">
+            <textarea rows="1" id="Quote${lineCount}"></textarea>
         </div>
         <div class="field field-context">
             <label for="Context${lineCount}">Kontext</label>
-            <input type="text" id="Context${lineCount}" placeholder="Optional">
+            <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
         </div>
     `;
 

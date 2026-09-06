@@ -21,6 +21,7 @@ export function createPersonDropdown(idSuffix, persons) {
         </div>
         <div class="person-dropdown-panel" hidden>
             <ul class="person-dropdown-list" role="listbox"></ul>
+            <button type="button" class="person-dropdown-add" width="100%">+ Neue Person hinzufügen</button>
         </div>
     `;
 
@@ -28,6 +29,15 @@ export function createPersonDropdown(idSuffix, persons) {
     const searchInput = wrapper.querySelector('.person-dropdown-input');
     const panel = wrapper.querySelector('.person-dropdown-panel');
     const list = wrapper.querySelector('.person-dropdown-list');
+    const addPersonButton = wrapper.querySelector('.person-dropdown-add');
+
+    addPersonButton.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+    });
+
+    addPersonButton.addEventListener('click', () => {
+        openPersonPopup();
+    });
 
     let lastSelectedPerson = null;
 
@@ -135,6 +145,82 @@ export function createPersonDropdown(idSuffix, persons) {
     });
 
     return wrapper;
+}
+
+export function openPersonPopup() {
+    const overlay = document.createElement('div');
+    overlay.className = 'person-popup-overlay';
+
+    overlay.innerHTML = `
+        <div class="person-popup">
+            <h2>Neue Person</h2>
+
+            <div class="field-row">
+                <div class="field">
+                    <label for="newPersonField1">Bezeichnung</label>
+                    <select id="newPersonField1">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                        <option>Option 3</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="newPersonField2">Art</label>
+                    <input
+                        type="text"
+                        id="newPersonField2"
+                        placeholder="z.B. Person">
+                </div>
+            </div>
+
+            <div class="person-popup-footer">
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    id="newPersonCancel">
+                    Abbrechen
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-primary"
+                    id="newPersonSave">
+                    Speichern
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-close-x"
+                    id="newPersonClose"
+                    aria-label="Schließen">
+                    ✕
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const closePopup = () => {
+        overlay.remove();
+    };
+
+    overlay.querySelector('#newPersonCancel').addEventListener('click', closePopup);
+
+    overlay.querySelector('#newPersonClose').addEventListener('click', closePopup);
+
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+            closePopup();
+        }
+    });
+
+    overlay.querySelector('#newPersonSave').addEventListener('click', () => {
+        console.log('Neue Person gespeichert');
+
+        closePopup();
+    });
 }
 
 export function getSelectedPersonId(wrapper) {

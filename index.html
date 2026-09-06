@@ -16,7 +16,38 @@
         <button id="openBtn">Neues Zitat</button>
 
         <div class="overlay" id="overlay">
-            <div class="popup">
+            <div class="quote-popup">
+                <h2>Neues Zitat</h2>
+        
+                <div class="field-row">
+                    <div class="field field-person">
+                        <label>Person</label>
+                        <div class="person-dropdown-slot" id="personSlot"></div>
+                    </div>
+                    <div class="field field-notes">
+                        <label for="Notes">Notiz</label>
+                        <textarea rows="1" id="Notes" placeholder="Optional"></textarea>
+                    </div>
+                    <div class="field field-quote">
+                        <label for="Quote">Zitat</label>
+                        <textarea rows="1" id="Quote"></textarea>
+                    </div>
+                    <div class="field field-context">
+                        <label for="Context">Kontext</label>
+                        <textarea rows="1" id="Context" placeholder="Optional"></textarea>
+                    </div>
+                </div>
+        
+                <div class="left-action">
+                    <button class="btn-secondary" id="extraFieldBtn">+ Weitere Zeile</button>
+                </div>
+        
+                <div class="quote-popup-footer">
+                    <button class="btn-close-x" id="closeXBtn" aria-label="Schließen">Abbrechen</button>
+                    <button class="btn-primary" id="saveBtn">Speichern</button>
+                </div>
+            </div>
+            <div class="person-popup">
                 <h2>Neues Zitat</h2>
         
                 <div class="field-row">
@@ -42,7 +73,7 @@
                     <button class="btn-secondary" id="extraFieldBtn">+ Weitere Zeile</button>
                 </div>
         
-                <div class="popup-footer">
+                <div class="quote-popup-footer">
                     <button class="btn-close-x" id="closeXBtn" aria-label="Schließen">Abbrechen</button>
                     <button class="btn-primary" id="saveBtn">Speichern</button>
                 </div>
