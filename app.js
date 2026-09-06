@@ -141,7 +141,7 @@ extraFieldBtn.addEventListener('click', () => {
     const newRow = document.createElement('div');
     newRow.className = 'field-row';
     newRow.innerHTML = `
-        <div class="field">
+        <div class="field field-person">
             <label>Person</label>
             <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
         </div>
@@ -149,13 +149,13 @@ extraFieldBtn.addEventListener('click', () => {
             <label for="Notes${lineCount}">Notiz</label>
             <input type="text" id="Notes${lineCount}" placeholder="Optional">
         </div>
-        <div class="field field-wide">
+        <div class="field field-quote">
             <label for="Quote${lineCount}">Zitat</label>
             <input type="text" id="Quote${lineCount}">
         </div>
-        <div class="field">
+        <div class="field field-context">
             <label for="Context${lineCount}">Kontext</label>
-            <input type="text" id="Context${lineCount}" placeholder="optional">
+            <input type="text" id="Context${lineCount}" placeholder="Optional">
         </div>
     `;
 
@@ -165,7 +165,9 @@ extraFieldBtn.addEventListener('click', () => {
     const slot = newRow.querySelector(`#personSlot${lineCount}`);
     mountPersonDropdown(lineCount, slot);
 
-    newRow.querySelector(`#Quote${lineCount}`).focus();
+    newRow.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+    });
 });
 
 async function init() {
@@ -178,5 +180,14 @@ async function init() {
     const firstRowSlot = document.getElementById('personSlot');
     mountPersonDropdown('', firstRowSlot);
 }
+
+function autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+document.querySelectorAll('.field textarea').forEach(textarea => {
+    textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+});
 
 init();

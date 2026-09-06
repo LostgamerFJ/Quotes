@@ -64,7 +64,7 @@ body {
 
 .popup {
     background: white;
-    width: 600px;
+    width: 70%;
     max-width: 90vw;
     border-radius: 12px;
     padding: 28px;
@@ -100,10 +100,32 @@ body {
     font-size: 14px;
     background: #fcf0d6;
 }
-.field-wide {
+.field input:focus {
+    outline: 2px solid var(--teal);
+    outline-offset: 1px;
+}
+.field-quote {
     flex: 4;
 }
-.field input:focus {
+.field-context{
+    flex: 2;
+}
+.field-person {
+    flex: 1.25;
+}
+.field textarea {
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+    background: #fcf0d6;
+}
+.field textarea:focus {
     outline: 2px solid var(--teal);
     outline-offset: 1px;
 }
@@ -162,7 +184,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 10px;
+    padding: 0px 0px;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: white;
