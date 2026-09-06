@@ -1,11 +1,11 @@
 export class QuoteLine {
 
     constructor(ID, PERSON, NOTES = null, QUOTE, CONTEXT = null){
-        let id = ID;
-        let person = PERSON;
-        let notes = NOTES;
-        let quote = QUOTE;
-        let context = CONTEXT;
+        this.id = ID;
+        this.person = PERSON;
+        this.notes = NOTES;
+        this.quote = QUOTE;
+        this.context = CONTEXT;
     }
 
     static fromJSON(obj){

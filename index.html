@@ -6,16 +6,6 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-    <!--
-    <h1><u>Lehrer:</u></h1>
-        <table id="lehrerZitate">
-            <tr>
-                <td>Herr Klumpner:</td>
-                <td>"Test"</td>
-            </tr>
-        </table>
-    -->
-
         <button type="button" class="collapsible">
             <img src="./assets/Portrait_Placeholder.png" height="50">
         </button>
@@ -31,14 +21,14 @@
         
                 <div class="field-row">
                     <div class="field">
-                        <label for="Person">Person</label>
-                        <select id="Person"></select>
+                        <label>Person</label>
+                        <div class="person-dropdown-slot" id="personSlot"></div>
                     </div>
                     <div class="field">
                         <label for="Notes">Notiz</label>
                         <input type="text" id="Notes" placeholder="Optional">
                     </div>
-                    <div class="field">
+                    <div class="field field-wide">
                         <label for="Quote">Zitat</label>
                         <input type="text" id="Quote">
                     </div>

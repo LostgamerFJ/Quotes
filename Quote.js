@@ -1,10 +1,8 @@
-//import { QuoteLine } from `./QuoteLine.js`;    
-
 export class Quote {
 
     constructor(ID, LINES = []){
-        const id = ID;
-        const lines = LINES;
+        this.id = ID;
+        this.lines = LINES;
     }
 
     static fromJSON(obj){

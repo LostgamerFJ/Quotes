@@ -1,12 +1,12 @@
 export class Person {
 
     constructor(ID, SALUTATION = null, FIRSTNAME = null, LASTNAME, TAG, PICURL = "./Portrait_Placeholder.png"){
-        let id = ID;
-        let salutation = SALUTATION;
-        let firstName = FIRSTNAME;
-        let lastName = LASTNAME;
-        let tag = TAG;
-        let picUrl = PICURL;
+        this.id = ID;
+        this.salutation = SALUTATION;
+        this.firstName = FIRSTNAME;
+        this.lastName = LASTNAME;
+        this.tag = TAG;
+        this.picUrl = PICURL;
     }
 
     changePic(picPath) {

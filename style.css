@@ -87,6 +87,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 .field label {
     font-size: 12px;
@@ -99,9 +100,8 @@ body {
     font-size: 14px;
     background: #fcf0d6;
 }
-.field:has(#Quote) {
-    flex: 10;
-    background: red;
+.field-wide {
+    flex: 4;
 }
 .field input:focus {
     outline: 2px solid var(--teal);
@@ -151,3 +151,98 @@ body {
     justify-content: center;
 }
 .btn-close-x:hover { background: #f4f5f6; }
+
+.person-dropdown {
+    position: relative;
+    width: 220px;
+}
+
+.person-dropdown-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: white;
+    box-sizing: border-box;
+}
+.person-dropdown-toggle:focus-within {
+    outline: 2px solid var(--teal);
+    outline-offset: 1px;
+}
+
+.person-dropdown-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--text-dark);
+    background: transparent;
+    padding: 0;
+}
+.person-dropdown-input::placeholder {
+    color: var(--text-muted);
+}
+
+.person-dropdown-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.person-dropdown-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 260px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    z-index: 20;
+    overflow: hidden;
+}
+.person-dropdown-panel[hidden] {
+    display: none;
+}
+
+.person-dropdown-list {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.person-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.person-dropdown-item:hover,
+.person-dropdown-item.highlighted {
+    background: #eef6f5;
+}
+.person-dropdown-item img {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #ddd;
+    flex-shrink: 0;
+}
+
+.person-dropdown-empty {
+    padding: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+}

@@ -1,6 +1,7 @@
 import { Quote } from './Quote.js';
 import { QuoteLine } from './QuoteLine.js';
 import { Person } from './Person.js';
+import { createPersonDropdown, getSelectedPersonId } from './Person_Dropdown.js';
 
 const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
 
@@ -8,7 +9,7 @@ let Persons = [];
 let QuoteLines = [];
 let Quotes = [];
 
-let personSelector = Persons;
+const personDropdowns = new Map();
 
 var coll = document.getElementsByClassName("collapsible");
 var i;
@@ -25,84 +26,72 @@ for (i = 0; i < coll.length; i++) {
     });
 }
 
-async function loadRoute(Route) {
-    const response = await fetch(`${WORKER_URL}/${Route}`);
+async function loadRoute(route) {
+    const response = await fetch(`${WORKER_URL}/${route}`);
 
     if (!response.ok){
-        throw new Error (`Fehler beim Laden von ${Route}: ${response.status}`)
+        throw new Error(`Fehler beim Laden von ${route}: ${response.status}`);
     }
 
     return await response.json();
 }
 
-async function saveRoute(Route, array) {
-    const response = await fetch(`${WORKER_URL}/${Route}`, {
+async function saveRoute(route, array) {
+    const response = await fetch(`${WORKER_URL}/${route}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(array),
     });
- 
+
     if (!response.ok) {
-        throw new Error(`Fehler beim Speichern von ${Route}: ${response.status}`);
+        throw new Error(`Fehler beim Speichern von ${route}: ${response.status}`);
     }
 }
 
-
 async function getAll() {
-    const [PersonsRaw, QuoteLinesRaw, QuotesRaw] = await Promise.all([
+    const [personsRaw, quoteLinesRaw, quotesRaw] = await Promise.all([
         loadRoute("Persons"),
         loadRoute("QuoteLines"),
         loadRoute("Quotes"),
     ]);
- 
-    const Persons = (PersonsRaw || []).map(p => Person.fromJSON(p));
-    const QuoteLines = (QuoteLinesRaw || []).map(z => QuoteLines.fromJSON(z));
-    const Quotes = (QuotesRaw || []).map(q => Quote.fromJSON(q));
- 
-    return { Persons, QuoteLines, Quotes }; //callable Arrays
-}
 
-getAll();
+    Persons = (personsRaw || []).map(p => Person.fromJSON(p));
+    QuoteLines = (quoteLinesRaw || []).map(z => QuoteLine.fromJSON(z));
+    Quotes = (quotesRaw || []).map(q => Quote.fromJSON(q));
+}
 
 async function savePersons(persons) {
     await saveRoute("Persons", persons);
 }
- 
-async function saveLines(QuoteLines) {
-    await saveRoute("QuoteLines", QuoteLines);
-}
- 
-async function saveQuotes(Quotes) {
-    await saveRoute("Quotes", Quotes);
-}
- 
-const saveAllBtn = document.getElementById('saveAllBtn');
 
-saveAllBtn.addEventListener('click', () => {
-    saveAll(Persons, QuoteLines, Quotes);
-});
+async function saveLines(quoteLines) {
+    await saveRoute("QuoteLines", quoteLines);
+}
 
-async function saveAll(persons, QuoteLines, Quotes) {
+async function saveQuotes(quotes) {
+    await saveRoute("Quotes", quotes);
+}
+
+async function saveAll(persons, quoteLines, quotes) {
     await Promise.all([
         savePersons(persons),
-        saveLines(QuoteLines),
-        saveQuotes(Quotes),
+        saveLines(quoteLines),
+        saveQuotes(quotes),
     ]);
 }
 
-const PersonSelect = document.getElementById('Person');
-personSelector.forEach(optionText => {
-    const option = document.createElement('option');
-    option.value = optionText;
-    option.textContent = optionText;
-    PersonSelect.appendChild(option);
-});
+function mountPersonDropdown(idSuffix, slotElement) {
+    const dropdown = createPersonDropdown(idSuffix, Persons);
+    slotElement.appendChild(dropdown);
+    personDropdowns.set(idSuffix, dropdown);
+}
 
 const overlay = document.getElementById('overlay');
 const openBtn = document.getElementById('openBtn');
 const closeXBtn = document.getElementById('closeXBtn');
 const saveBtn = document.getElementById('saveBtn');
 const extraFieldBtn = document.getElementById('extraFieldBtn');
+const saveAllBtn = document.getElementById('saveAllBtn');
 
 openBtn.addEventListener('click', () => {
     overlay.classList.add('active');
@@ -118,15 +107,32 @@ overlay.addEventListener('click', (event) => {
     }
 });
 
+function collectRows() {
+    const rows = [];
+
+    for (const suffix of personDropdowns.keys()) {
+        const dropdown = personDropdowns.get(suffix);
+        const notesField = document.getElementById(`Notes${suffix}`);
+        const quoteField = document.getElementById(`Quote${suffix}`);
+        const contextField = document.getElementById(`Context${suffix}`);
+
+        rows.push({
+            person: getSelectedPersonId(dropdown),
+            notes: notesField.value,
+            quote: quoteField.value,
+            context: contextField.value,
+        });
+    }
+
+    return rows;
+}
+
 saveBtn.addEventListener('click', () => {
-    console.log('Gespeichert:', {
-        Person: document.getElementById('Person').value,
-        Notes: document.getElementById('Notes').value,
-        Quote: document.getElementById('Quote').value,
-        Context: document.getElementById('Context').value,
-    });
+    const rows = collectRows();
+    console.log('Gespeichert:', rows);
     overlay.classList.remove('active');
 });
+
 let lineCount = 0;
 
 extraFieldBtn.addEventListener('click', () => {
@@ -136,14 +142,14 @@ extraFieldBtn.addEventListener('click', () => {
     newRow.className = 'field-row';
     newRow.innerHTML = `
         <div class="field">
-            <label for="Person${lineCount}">Person</label>
-            <select id="Person${lineCount}"></select>
+            <label>Person</label>
+            <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
         </div>
         <div class="field">
             <label for="Notes${lineCount}">Notiz</label>
             <input type="text" id="Notes${lineCount}" placeholder="Optional">
         </div>
-        <div class="field">
+        <div class="field field-wide">
             <label for="Quote${lineCount}">Zitat</label>
             <input type="text" id="Quote${lineCount}">
         </div>
@@ -156,13 +162,17 @@ extraFieldBtn.addEventListener('click', () => {
     const leftAction = document.querySelector('.left-action');
     leftAction.parentNode.insertBefore(newRow, leftAction);
 
-    const personSelect = newRow.querySelector(`#Person${lineCount}`);
-    personSelector.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        personSelect.appendChild(option);
-    });
+    const slot = newRow.querySelector(`#personSlot${lineCount}`);
+    mountPersonDropdown(lineCount, slot);
 
     newRow.querySelector(`#Quote${lineCount}`).focus();
 });
+
+async function init() {
+    await getAll();
+
+    const firstRowSlot = document.getElementById('personSlot');
+    mountPersonDropdown('', firstRowSlot);
+}
+
+init();
