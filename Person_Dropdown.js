@@ -31,6 +31,11 @@ export function createPersonDropdown(idSuffix, persons) {
     const list = wrapper.querySelector('.person-dropdown-list');
     const addPersonButton = wrapper.querySelector('.person-dropdown-add');
 
+    const MIN_INPUT_SIZE = 12;
+    function updateInputWidth(text) {
+        searchInput.size = Math.max(MIN_INPUT_SIZE, text.length + 2);
+    }
+
     addPersonButton.addEventListener('mousedown', (event) => {
         event.preventDefault();
     });
@@ -83,6 +88,7 @@ export function createPersonDropdown(idSuffix, persons) {
         toggleAvatar.src = person.picUrl || '';
         toggleAvatar.hidden = false;
         searchInput.value = personLabel(person);
+        updateInputWidth(personLabel(person));
     }
 
     function resetToLastValidSelection() {
@@ -91,10 +97,12 @@ export function createPersonDropdown(idSuffix, persons) {
             wrapper.dataset.selectedId = lastSelectedPerson.id;
             toggleAvatar.src = lastSelectedPerson.picUrl || '';
             toggleAvatar.hidden = false;
+            updateInputWidth(personLabel(lastSelectedPerson));
         } else {
             searchInput.value = '';
             wrapper.dataset.selectedId = '';
             toggleAvatar.hidden = true;
+            updateInputWidth('');
         }
     }
 
@@ -144,6 +152,8 @@ export function createPersonDropdown(idSuffix, persons) {
         }, 150);
     });
 
+    updateInputWidth('');
+    
     return wrapper;
 }
 

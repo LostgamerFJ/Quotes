@@ -78,7 +78,6 @@ body {
 }
 
 .person-popup {
-    display: none;
     background: white;
     width: 70%;
     max-width: 90vw;
@@ -133,7 +132,7 @@ body {
 }
 .field-person {
     min-width: 96px;
-    flex: 1.25;
+    flex: 0 0 auto;
 }
 .field textarea {
     padding: 9px 10px;
@@ -196,14 +195,29 @@ body {
 }
 .btn-close-x:hover { background: #f4f5f6; }
 
+.btn-reset {
+    width: 110px;
+    height: 38px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #c7c7c7;;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-reset:hover { background: #f4f5f6; }
+
 .person-dropdown {
     position: relative;
-    width: 100%;
+    width: auto;
 }
 
 .person-dropdown-toggle {
-    width: 100%;
-    display: flex;
+    width: auto;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 0px 0px;
@@ -218,8 +232,8 @@ body {
 }
 
 .person-dropdown-input {
-    flex: 1;
     min-width: 0;
+    width:auto;
     border: none;
     outline: none;
     font-size: 14px;
@@ -305,6 +319,10 @@ body {
 
 .person-dropdown-add:hover {
     background: #eef6f5;
+}
+
+.person-dropdown-slot {
+    align-self: flex-start;
 }
 
 .person-popup-overlay {

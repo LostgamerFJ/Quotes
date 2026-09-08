@@ -9,7 +9,16 @@ let Persons = [];
 let QuoteLines = [];
 let Quotes = [];
 
+let lineCount = 0;
+
 const personDropdowns = new Map();
+
+let overlay = null;
+let openBtn = null;
+let closeXBtn = null;
+let saveBtn = null;
+let extraFieldBtn = null;
+let resetBtn = null;
 
 var coll = document.getElementsByClassName("collapsible");
 var i;
@@ -86,27 +95,6 @@ function mountPersonDropdown(idSuffix, slotElement) {
     personDropdowns.set(idSuffix, dropdown);
 }
 
-const overlay = document.getElementById('overlay');
-const openBtn = document.getElementById('openBtn');
-const closeXBtn = document.getElementById('closeXBtn');
-const saveBtn = document.getElementById('saveBtn');
-const extraFieldBtn = document.getElementById('extraFieldBtn');
-const saveAllBtn = document.getElementById('saveAllBtn');
-
-openBtn.addEventListener('click', () => {
-    overlay.classList.add('active');
-});
-
-closeXBtn.addEventListener('click', () => {
-    overlay.classList.remove('active');
-});
-
-overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) {
-        overlay.classList.remove('active');
-    }
-});
-
 function collectRows() {
     const rows = [];
 
@@ -127,17 +115,44 @@ function collectRows() {
     return rows;
 }
 
-saveBtn.addEventListener('click', () => {
-    const rows = collectRows();
-    console.log('Gespeichert:', rows);
-    overlay.classList.remove('active');
-});
+function reset(){
+    lineCount = 0;
+    document.getElementById("quote-popup").innerHTML = `
+        <h2>Neues Zitat</h2>
+        
+        <div class="field-row">
+            <div class="field field-person">
+                <label>Person</label>
+                <div class="person-dropdown-slot" id="personSlot"></div>
+            </div>
+            <div class="field field-notes">
+                <label for="Notes">Notiz</label>
+                <textarea rows="1" id="Notes" placeholder="Optional"></textarea>
+            </div>
+            <div class="field field-quote">
+                <label for="Quote">Zitat</label>
+                <textarea rows="1" id="Quote"></textarea>
+            </div>
+            <div class="field field-context">
+                <label for="Context">Kontext</label>
+                <textarea rows="1" id="Context" placeholder="Optional"></textarea>
+            </div>
+        </div>
 
-let lineCount = 0;
+        <div class="left-action">
+            <button class="btn-secondary" id="extraFieldBtn">+ Weitere Zeile</button>
+        </div>
 
-extraFieldBtn.addEventListener('click', () => {
-    lineCount++;
+        <div class="quote-popup-footer">
+            <button class="btn-reset" id="resetBtn">Zurücksetzen</button>
+            <button class="btn-close-x" id="closeXBtn" aria-label="Schließen">Abbrechen</button>
+            <button class="btn-primary" id="saveBtn">Speichern</button>
+        </div>
+    `;
+    startUp();
+}
 
+function addLine(){
     const newRow = document.createElement('div');
     newRow.className = 'field-row';
     newRow.innerHTML = `
@@ -168,7 +183,45 @@ extraFieldBtn.addEventListener('click', () => {
     newRow.querySelectorAll('textarea').forEach(textarea => {
         textarea.addEventListener('input', () => autoResizeTextarea(textarea));
     });
-});
+}
+
+function startUp(){
+    overlay = document.getElementById('overlay');
+    openBtn = document.getElementById('openBtn');
+    closeXBtn = document.getElementById('closeXBtn');
+    saveBtn = document.getElementById('saveBtn');
+    extraFieldBtn = document.getElementById('extraFieldBtn');
+    resetBtn = document.getElementById("resetBtn");
+
+    openBtn.addEventListener('click', () => {
+        overlay.classList.add('active');
+    });
+
+    closeXBtn.addEventListener('click', () => {
+        overlay.classList.remove('active');
+    });
+
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+            overlay.classList.remove('active');
+        }
+    });
+
+    saveBtn.addEventListener('click', () => {
+        const rows = collectRows();
+        console.log('Gespeichert:', rows);
+        overlay.classList.remove('active');
+    });
+
+    resetBtn.addEventListener('click', () => {
+        reset();
+    })
+
+    extraFieldBtn.addEventListener('click', () => {
+        lineCount++;
+        addLine();
+    });
+}
 
 async function init() {
     try {
@@ -190,4 +243,6 @@ document.querySelectorAll('.field textarea').forEach(textarea => {
     textarea.addEventListener('input', () => autoResizeTextarea(textarea));
 });
 
+addLine();
 init();
+startUp();
