@@ -165,22 +165,34 @@ export function openPersonPopup() {
         <div class="person-popup">
             <h2>Neue Person</h2>
 
-            <div class="field-row">
-                <div class="field">
-                    <label for="newPersonField1">Bezeichnung</label>
-                    <select id="newPersonField1">
-                        <option>Option 1</option>
-                        <option>Option 2</option>
-                        <option>Option 3</option>
-                    </select>
+            <div class="field-line field-line-person">
+                <div class="avatar-upload">
+                    <h1 class="upload-icon">+</h1>
+                    <input class="avatar-uploader" type="file" id="AvatarInput" accept="image/*">
                 </div>
 
                 <div class="field">
-                    <label for="newPersonField2">Art</label>
-                    <input
-                        type="text"
-                        id="newPersonField2"
-                        placeholder="z.B. Person">
+                    <label for="SalutationDropdown">Anrede</label>
+                    <select id="SalutationDropdown">
+                        <option value="Herr">Herr</option>
+                        <option value="Frau">Frau</option>
+                        <option value="null">Keine Anrede</option>
+                    </select>
+                </div>
+                <div class="field field-notes">
+                    <label for="SurName">Vorname</label>
+                    <textarea lines="1" id="SurName"></textarea>
+                </div>
+                <div class="field field-notes">
+                    <label for="LastName">Nachname</label>
+                    <textarea lines="1" id="LastName"></textarea>
+                </div>
+                <div class="field">
+                    <label for="TagDropdown">Typ</label>
+                    <select id="TagDropdown">
+                        <option value="Teacher">Lehrer*in</option>
+                        <option value="Student">Schüler*in</option>
+                    </select>
                 </div>
             </div>
 
@@ -197,14 +209,6 @@ export function openPersonPopup() {
                     class="btn-primary"
                     id="newPersonSave">
                     Speichern
-                </button>
-
-                <button
-                    type="button"
-                    class="btn-close-x"
-                    id="newPersonClose"
-                    aria-label="Schließen">
-                    ✕
                 </button>
             </div>
         </div>

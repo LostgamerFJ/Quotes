@@ -10,7 +10,7 @@ export class Person {
     }
 
     changePic(picPath) {
-        picUrl = picPath;
+        this.picUrl = picPath;
     }
 
     static fromJSON(obj){

@@ -19,6 +19,7 @@ let closeXBtn = null;
 let saveBtn = null;
 let extraFieldBtn = null;
 let resetBtn = null;
+let avatarInput = null;
 
 var coll = document.getElementsByClassName("collapsible");
 var i;
@@ -95,8 +96,8 @@ function mountPersonDropdown(idSuffix, slotElement) {
     personDropdowns.set(idSuffix, dropdown);
 }
 
-function collectRows() {
-    const rows = [];
+function collectLines() {
+    const lines = [];
 
     for (const suffix of personDropdowns.keys()) {
         const dropdown = personDropdowns.get(suffix);
@@ -104,7 +105,7 @@ function collectRows() {
         const quoteField = document.getElementById(`Quote${suffix}`);
         const contextField = document.getElementById(`Context${suffix}`);
 
-        rows.push({
+        lines.push({
             person: getSelectedPersonId(dropdown),
             notes: notesField.value,
             quote: quoteField.value,
@@ -112,40 +113,24 @@ function collectRows() {
         });
     }
 
-    return rows;
+    return lines;
 }
 
 function reset(){
     lineCount = 0;
     document.getElementById("quote-popup").innerHTML = `
         <h2>Neues Zitat</h2>
-        
-        <div class="field-row">
-            <div class="field field-person">
-                <label>Person</label>
-                <div class="person-dropdown-slot" id="personSlot"></div>
-            </div>
-            <div class="field field-notes">
-                <label for="Notes">Notiz</label>
-                <textarea rows="1" id="Notes" placeholder="Optional"></textarea>
-            </div>
-            <div class="field field-quote">
-                <label for="Quote">Zitat</label>
-                <textarea rows="1" id="Quote"></textarea>
-            </div>
-            <div class="field field-context">
-                <label for="Context">Kontext</label>
-                <textarea rows="1" id="Context" placeholder="Optional"></textarea>
-            </div>
-        </div>
+
+        <div class="field-line"></div>
 
         <div class="left-action">
-            <button class="btn-secondary" id="extraFieldBtn">+ Weitere Zeile</button>
+            <button class="btn-seamless" id="extraFieldBtn">+ Weitere Zeile</button>
+            <button class="btn-seamless" id="removeLineBtn">- Letzte Zeile entfernen</button>
         </div>
 
         <div class="quote-popup-footer">
-            <button class="btn-reset" id="resetBtn">Zurücksetzen</button>
-            <button class="btn-close-x" id="closeXBtn" aria-label="Schließen">Abbrechen</button>
+            <button class="btn-secondary" id="resetBtn">Zurücksetzen</button>
+            <button class="btn-secondary" id="closeXBtn" aria-label="Schließen">Abbrechen</button>
             <button class="btn-primary" id="saveBtn">Speichern</button>
         </div>
     `;
@@ -153,36 +138,47 @@ function reset(){
 }
 
 function addLine(){
-    const newRow = document.createElement('div');
-    newRow.className = 'field-row';
-    newRow.innerHTML = `
+    const newLine = document.createElement('div');
+    newLine.classList = 'field-line field-line-quote';
+    newLine.id = `field-line${lineCount}`
+    newLine.innerHTML = `
         <div class="field field-person">
             <label>Person</label>
             <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
         </div>
         <div class="field field-notes">
             <label for="Notes${lineCount}">Notiz</label>
-            <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
+            <textarea lines="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
         </div>
         <div class="field field-quote">
             <label for="Quote${lineCount}">Zitat</label>
-            <textarea rows="1" id="Quote${lineCount}"></textarea>
+            <textarea lines="1" id="Quote${lineCount}"></textarea>
         </div>
         <div class="field field-context">
             <label for="Context${lineCount}">Kontext</label>
-            <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
+            <textarea lines="1" id="Context${lineCount}" placeholder="Optional"></textarea>
         </div>
     `;
 
     const leftAction = document.querySelector('.left-action');
-    leftAction.parentNode.insertBefore(newRow, leftAction);
+    leftAction.parentNode.insertBefore(newLine, leftAction);
 
-    const slot = newRow.querySelector(`#personSlot${lineCount}`);
+    const slot = newLine.querySelector(`#personSlot${lineCount}`);
     mountPersonDropdown(lineCount, slot);
 
-    newRow.querySelectorAll('textarea').forEach(textarea => {
+    newLine.querySelectorAll('textarea').forEach(textarea => {
         textarea.addEventListener('input', () => autoResizeTextarea(textarea));
     });
+    lineCount++;
+}
+
+function removeLastLine(){
+    const lines = document.querySelectorAll(".field-line-quote");
+    const lastLine = lines[lines.length - 1];
+    if (!lastLine) return;
+    if (lines.length == 1) return;
+    lastLine.remove();
+    lineCount--;
 }
 
 function startUp(){
@@ -192,6 +188,7 @@ function startUp(){
     saveBtn = document.getElementById('saveBtn');
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
+    avatarInput = document.getElementById("AvatarInput")
 
     openBtn.addEventListener('click', () => {
         overlay.classList.add('active');
@@ -208,8 +205,8 @@ function startUp(){
     });
 
     saveBtn.addEventListener('click', () => {
-        const rows = collectRows();
-        console.log('Gespeichert:', rows);
+        const lines = collectLines();
+        console.log('Gespeichert:', lines);
         overlay.classList.remove('active');
     });
 
@@ -218,9 +215,16 @@ function startUp(){
     })
 
     extraFieldBtn.addEventListener('click', () => {
-        lineCount++;
         addLine();
     });
+
+    removeLineBtn.addEventListener('click', () => {
+        removeLastLine();
+    })
+
+    avatarInput.addEventListener('change', () =>{
+        showImg();
+    })
 }
 
 async function init() {
@@ -230,8 +234,6 @@ async function init() {
         console.error('Konnte Daten nicht laden:', err);
     }
 
-    const firstRowSlot = document.getElementById('personSlot');
-    mountPersonDropdown('', firstRowSlot);
 }
 
 function autoResizeTextarea(textarea) {
@@ -243,6 +245,23 @@ document.querySelectorAll('.field textarea').forEach(textarea => {
     textarea.addEventListener('input', () => autoResizeTextarea(textarea));
 });
 
-addLine();
+function showImg(){
+    const fileUploadInput = document.querySelector('.avatar-uploader');
+    if (!fileUploadInput.value) {
+        return;
+    }
+    const image = fileUploadInput.files[0];
+    if (!image.type.includes('image')) {
+        return alert('Nur Bild Dateien Erlaubt');
+    }
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(image);
+    fileReader.onload = (fileReaderEvent) => {
+        const profilePicture = document.querySelector('.avatar-upload');
+        profilePicture.style.backgroundImage = `url(${fileReaderEvent.target.result})`;
+    }
+}
+
 init();
+addLine();
 startUp();
