@@ -1,6 +1,6 @@
 export class Person {
 
-    constructor(ID, SALUTATION = null, FIRSTNAME = null, LASTNAME, TAG, PICURL = "./Portrait_Placeholder.png"){
+    constructor(ID, LASTNAME, TAG, PICURL = ".assets/Portrait_Placeholder.png", SALUTATION = null, FIRSTNAME = null){
         this.id = ID;
         this.salutation = SALUTATION;
         this.firstName = FIRSTNAME;

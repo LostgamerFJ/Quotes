@@ -5,7 +5,7 @@ import { createPersonDropdown, getSelectedPersonId } from './Person_Dropdown.js'
 
 const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
 
-let Persons = [];
+export let Persons = [];
 let QuoteLines = [];
 let Quotes = [];
 
@@ -70,23 +70,23 @@ async function getAll() {
     Quotes = (quotesRaw || []).map(q => Quote.fromJSON(q));
 }
 
-async function savePersons(persons) {
-    await saveRoute("Persons", persons);
+export async function savePersons() {
+    await saveRoute("Persons", Persons);
 }
 
-async function saveLines(quoteLines) {
-    await saveRoute("QuoteLines", quoteLines);
+async function saveLines() {
+    await saveRoute("QuoteLines", QuoteLines);
 }
 
-async function saveQuotes(quotes) {
-    await saveRoute("Quotes", quotes);
+async function saveQuotes() {
+    await saveRoute("Quotes", Quotes);
 }
 
-async function saveAll(persons, quoteLines, quotes) {
+async function saveAll() {
     await Promise.all([
-        savePersons(persons),
-        saveLines(quoteLines),
-        saveQuotes(quotes),
+        savePersons(),
+        saveLines(),
+        saveQuotes(),
     ]);
 }
 
@@ -105,12 +105,7 @@ function collectLines() {
         const quoteField = document.getElementById(`Quote${suffix}`);
         const contextField = document.getElementById(`Context${suffix}`);
 
-        lines.push({
-            person: getSelectedPersonId(dropdown),
-            notes: notesField.value,
-            quote: quoteField.value,
-            context: contextField.value,
-        });
+        lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), notesField.value, quoteField.value, contextField.value));
     }
 
     return lines;
@@ -186,6 +181,7 @@ function startUp(){
     openBtn = document.getElementById('openBtn');
     closeXBtn = document.getElementById('closeXBtn');
     saveBtn = document.getElementById('saveBtn');
+    saveAllBtn = document.getElementById('saveAllBtn');
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
     avatarInput = document.getElementById("AvatarInput")
@@ -206,9 +202,19 @@ function startUp(){
 
     saveBtn.addEventListener('click', () => {
         const lines = collectLines();
-        console.log('Gespeichert:', lines);
-        overlay.classList.remove('active');
+        let ids = [];
+        for (let i of lines){
+            QuoteLines.add(i);
+            ids.add(i.getID());
+        }
+        saveLines();
+        Quotes.add(new Quote(createQuoteID(), ids));
+        saveQuotes();
     });
+
+    saveAllBtn.addEventListener('click', () =>{
+        saveAll();
+    })
 
     resetBtn.addEventListener('click', () => {
         reset();
@@ -220,10 +226,6 @@ function startUp(){
 
     removeLineBtn.addEventListener('click', () => {
         removeLastLine();
-    })
-
-    avatarInput.addEventListener('change', () =>{
-        showImg();
     })
 }
 
@@ -245,7 +247,7 @@ document.querySelectorAll('.field textarea').forEach(textarea => {
     textarea.addEventListener('input', () => autoResizeTextarea(textarea));
 });
 
-function showImg(){
+export function showImg(){
     const fileUploadInput = document.querySelector('.avatar-uploader');
     if (!fileUploadInput.value) {
         return;
@@ -260,6 +262,14 @@ function showImg(){
         const profilePicture = document.querySelector('.avatar-upload');
         profilePicture.style.backgroundImage = `url(${fileReaderEvent.target.result})`;
     }
+}
+
+function createLineID(){
+    return QuoteLines.length() + 1;
+}
+
+function createQuoteID(){
+    return Quotes.length() + 1;
 }
 
 init();
