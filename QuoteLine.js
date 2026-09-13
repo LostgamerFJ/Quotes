@@ -20,4 +20,34 @@ export class QuoteLine {
         return this.personId;
     }
 
+    assemble(){
+        const QuoteString = "";
+        if (this.notes != null){
+            QuoteString += this.notes + " ";
+        }
+        
+        QuoteString += this.quote;
+
+        if (this.context != null){
+            QuoteString += " " + this.context;
+        }
+
+        return QuoteString;
+    }
+
+    assembleMultiple(){
+        const QuoteString = "";
+        if (this.notes != null){
+            QuoteString += this.notes + ": ";
+        }
+        
+        QuoteString += this.quote;
+
+        if (this.context != null){
+            QuoteString += " " + this.context;
+        }
+
+        return QuoteString;
+    }
+
 }

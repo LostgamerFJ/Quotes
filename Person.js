@@ -1,12 +1,16 @@
 export class Person {
 
-    constructor(ID, LASTNAME, TAG, PICURL = ".assets/Portrait_Placeholder.png", SALUTATION = null, FIRSTNAME = null){
+    constructor(ID, LASTNAME, TAG, PICURL, SALUTATION = null, FIRSTNAME = null){
         this.id = ID;
         this.salutation = SALUTATION;
         this.firstName = FIRSTNAME;
         this.lastName = LASTNAME;
         this.tag = TAG;
-        this.picUrl = PICURL;
+        if (PICURL.equals("Default")){
+            this.picUrl = ".assets/Portrait_Placeholder.png";
+        } else {
+            this.picUrl = PICURL;
+        }
     }
 
     changePic(picPath) {

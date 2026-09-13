@@ -2,6 +2,7 @@ import { Quote } from './Quote.js';
 import { QuoteLine } from './QuoteLine.js';
 import { Person } from './Person.js';
 import { createPersonDropdown, getSelectedPersonId } from './Person_Dropdown.js';
+import { createPersonID } from './Person_Popup.js';
 
 const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
 
@@ -20,6 +21,8 @@ let saveBtn = null;
 let extraFieldBtn = null;
 let resetBtn = null;
 let avatarInput = null;
+
+let DemoBtn = null;
 
 var coll = document.getElementsByClassName("collapsible");
 var i;
@@ -185,6 +188,7 @@ function startUp(){
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
     avatarInput = document.getElementById("AvatarInput")
+    DemoBtn = document.getElementById("DemoBtn");
 
     openBtn.addEventListener('click', () => {
         overlay.classList.add('active');
@@ -227,6 +231,34 @@ function startUp(){
     removeLineBtn.addEventListener('click', () => {
         removeLastLine();
     })
+
+    DemoBtn.addEventListener('click', () => {
+        Persons.push(new Person(createPersonID(), "Klumpner", "Lehrer", "Default", "Herr"));
+        Persons.push(new Person(createPersonID(), "Dollinger", "Lehrer", "Default", "Herr"));
+        Persons.push(new Person(createPersonID(), "Paula", "Schüler", "Default", null, "Jakob"));
+        Persons.push(new Person(createPersonID(), "Fürst", "Schüler", "Default", null , "Felix"));
+
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
+        Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
+        Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
+
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Ihr passt doch sowieso nicht auf!"`));
+        Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID()]));
+
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[4].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[4], `"MAAAAAAAN`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
+        Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
+        Quotes.push(new Quote(createQuoteID(), [QuoteLines[4].getID(), QuoteLines[5].getID()]));
+
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[3], `"Ich brauch mehr Spucke im Rachen"`));
+        QuoteLines.push(new QuoteLine(createLineID(), Persons[3], `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
+        Quotes.push(new Quote(createQuoteID(), [QuoteLines[7]]));
+        Quotes.push(new Quote(createQuoteID(), [QuoteLines[8]]));
+    })
+
+    renderCollapsibles();
 }
 
 async function init() {
@@ -279,26 +311,33 @@ function renderCollapsibles(){
         const PID = h.getID();
         const PPic = h.getSrc();
         const PName = h.getName();
+        const QCOunt = collectQuotes(PID).length;
         newColl.id(`Collapsible${PID}`);
         newColl.innerHTML(`
             <button type="button" class="collapsible">
                 <img src="${PPic}" height="50">
                 <p class="name">${PName}</p>
-                <p class="quoteCount">50</p>
+                <p class="quoteCount">${QCOunt}</p>
             </button>
-            <div class="content" id="quotes${PName}>
-            </div>
+            <div class="content" id="quotes${PName}></div>
         `)
         
         const content = document.getElementById(`quotes${PName}`)
         for (let quotes of collectQuotes(PID)){
             const newQuote = document.createElement("div");
             const lines = quotes.getLines();
-            
-            for (let lins of lines){
-
+            const tempQuotes = "";
+            if (lines.length > 1){
+                for (let lins of lines){
+                    tempQuotes += `<p>${Persons[PID].getName()} ${lins.assembleMultiple()}</p> <br>`
+                }
+                newQuote.innerHTML(tempQuotes);
+            } else {
+                newQuote.innerHTML(`
+                    <p>${lines[1].assemble()}</p> <br>
+                `);
             }
-            newQuote.innerHTML();
+            
         }
 
         colls.insertBefore(newColl, document.getElementById("bottom"))

@@ -94,7 +94,7 @@ export function openPersonPopup() {
     })
 
     saveBtn.addEventListener('click', () => {
-        Persons.push(new Person(generateID(), LastName.value, Tag.value, `.assets/${Avatar.value}`, Salutation.value, FirstName.value))
+        Persons.push(new Person(generatePersonID(), LastName.value, Tag.value, `.assets/${Avatar.value}`, Salutation.value, FirstName.value))
         savePersons();
     })
 }
@@ -104,6 +104,6 @@ function reset(){
     openPersonPopup();
 }
 
-function generateID(){
+export function createPersonID(){
     return Persons.length + 1
 }
