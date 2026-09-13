@@ -1,4 +1,4 @@
-import { savePersons, Persons, showImg } from "./app.js";
+import { savePersons, Persons, PersonCounter, showImg } from "./app.js";
 import { Person } from "./Person.js";
 
 export function openPersonPopup() {
@@ -73,12 +73,6 @@ export function openPersonPopup() {
         }
     });
 
-    overlay.querySelector('#newPersonSave').addEventListener('click', () => {
-        console.log('Neue Person gespeichert');
-
-        closePopup();
-    });
-
     Avatar.addEventListener('change', () =>{
         showImg();
     })
@@ -92,8 +86,9 @@ export function openPersonPopup() {
     })
 
     saveBtn.addEventListener('click', () => {
-        Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `.assets/${Avatar.value}`, Salutation.value, FirstName.value))
+        Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `./assets/${Avatar.value}`, Salutation.value, FirstName.value))
         savePersons();
+        closePopup();
     })
 }
 
@@ -103,5 +98,6 @@ function reset(){
 }
 
 export function createPersonID(){
-    return Persons.length;
+    PersonCounter ++;
+    return PersonCounter;
 }

@@ -10,6 +10,10 @@ export let Persons = [];
 let QuoteLines = [];
 let Quotes = [];
 
+export let PersonCounter = null;
+let LineCounter = null;
+let QuoteCounter = null;
+
 let lineCount = 0;
 
 const personDropdowns = new Map();
@@ -25,20 +29,7 @@ let avatarInput = null;
 let removeLineBtn = null;
 let DemoBtn = null;
 
-var coll = document.getElementsByClassName("collapsible");
-var i;
-
-for (i = 0; i < coll.length; i++) {
-    coll[i].addEventListener("click", function() {
-        this.classList.toggle("active");
-        var content = this.nextElementSibling;
-        if (content.style.maxHeight){
-        content.style.maxHeight = null;
-        } else {
-        content.style.maxHeight = content.scrollHeight + "px";
-        }
-    });
-}
+await init();
 
 async function loadRoute(route) {
     const response = await fetch(`${WORKER_URL}/${route}`);
@@ -70,8 +61,11 @@ async function getAll() {
     ]);
 
     Persons = (personsRaw || []).map(p => Person.fromJSON(p));
+    PersonCounter = Persons.length;
     QuoteLines = (quoteLinesRaw || []).map(z => QuoteLine.fromJSON(z));
+    LineCounter = QuoteLines.length;
     Quotes = (quotesRaw || []).map(q => Quote.fromJSON(q));
+    QuoteCounter = Quotes.length;
 }
 
 export async function savePersons() {
@@ -326,11 +320,13 @@ export function showImg(){
 }
 
 function createLineID(){
-    return QuoteLines.length;
+    LineCounter ++;
+    return LineCounter;
 }
 
 function createQuoteID(){
-    return Quotes.length;
+    QuoteCounter ++;
+    return QuoteCounter;
 }
 
 function renderCollapsibles(){
@@ -358,7 +354,7 @@ function renderCollapsibles(){
             let tempQuotes = "";
             if (lines.length > 1){
                 for (let lins of lines){
-                    tempQuotes += `<p>${Persons[PID - 1].getName()} ${lins.assembleMultiple()}</p> <br>`
+                    tempQuotes += `<p>${Persons[PID].getName()} ${lins.assembleMultiple()}</p> <br>`
                 }
                 newQuote.innerHTML = tempQuotes;
             } else {
@@ -370,6 +366,19 @@ function renderCollapsibles(){
         }
 
         colls.insertBefore(newColl, document.getElementById("bottom"))
+    }
+    var coll = document.getElementsByClassName("collapsible");
+
+    for (let i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.maxHeight){
+            content.style.maxHeight = null;
+            } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            }
+        });
     }
 }
 
@@ -386,10 +395,5 @@ function collectQuotes(personID){
     return TempQuotes;
 }
 
-async function main() {
-    await init();
-    addLine();
-    startUp();
-}
-
-main();
+addLine();
+startUp();
