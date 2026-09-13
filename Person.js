@@ -6,7 +6,7 @@ export class Person {
         this.firstName = FIRSTNAME;
         this.lastName = LASTNAME;
         this.tag = TAG;
-        if (PICURL.equals("Default")){
+        if (PICURL === "Default"){
             this.picUrl = ".assets/Portrait_Placeholder.png";
         } else {
             this.picUrl = PICURL;
@@ -30,7 +30,7 @@ export class Person {
     }
 
     static fromJSON(obj){
-        return new Person(obj.id, obj.salutation, obj.firstName, obj.lastName, obj.tag, obj.picUrl)
+        return new Person(obj.id, obj.lastName, obj.tag, obj.picUrl, obj.salutation, obj.firstName);
     }
 
 }

@@ -36,7 +36,7 @@ export class QuoteLine {
     }
 
     assembleMultiple(){
-        const QuoteString = "";
+        let QuoteString = "";
         if (this.notes != null){
             QuoteString += this.notes + ": ";
         }

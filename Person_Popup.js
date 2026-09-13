@@ -1,4 +1,5 @@
 import { savePersons, Persons, showImg } from "./app.js";
+import { Person } from "./Person.js";
 
 export function openPersonPopup() {
     const overlay = document.createElement('div');
@@ -67,8 +68,6 @@ export function openPersonPopup() {
 
     overlay.querySelector('#newPersonCancel').addEventListener('click', closePopup);
 
-    overlay.querySelector('#newPersonClose').addEventListener('click', closePopup);
-
     overlay.addEventListener('click', (event) => {
         if (event.target === overlay) {
             closePopup();
@@ -94,13 +93,13 @@ export function openPersonPopup() {
     })
 
     saveBtn.addEventListener('click', () => {
-        Persons.push(new Person(generatePersonID(), LastName.value, Tag.value, `.assets/${Avatar.value}`, Salutation.value, FirstName.value))
+        Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `.assets/${Avatar.value}`, Salutation.value, FirstName.value))
         savePersons();
     })
 }
 
 function reset(){
-    closePopup();
+    overlay.remove();
     openPersonPopup();
 }
 

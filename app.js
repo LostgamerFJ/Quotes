@@ -18,10 +18,11 @@ let overlay = null;
 let openBtn = null;
 let closeXBtn = null;
 let saveBtn = null;
+let saveAllBtn = null;
 let extraFieldBtn = null;
 let resetBtn = null;
 let avatarInput = null;
-
+let removeLineBtn = null;
 let DemoBtn = null;
 
 var coll = document.getElementsByClassName("collapsible");
@@ -179,6 +180,74 @@ function removeLastLine(){
     lineCount--;
 }
 
+function handleOpenClick() {
+    overlay.classList.add('active');
+}
+
+function handleCloseClick() {
+    overlay.classList.remove('active');
+}
+
+function handleOverlayClick(event) {
+    if (event.target === overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+function handleSaveClick() {
+    const lines = collectLines();
+    let ids = [];
+    for (let i of lines){
+        QuoteLines.push(i);
+        ids.push(i.getID());
+    }
+    saveLines();
+    Quotes.push(new Quote(createQuoteID(), ids));
+    saveQuotes();
+}
+
+function handleSaveAllClick() {
+    saveAll();
+}
+
+function handleResetClick() {
+    reset();
+}
+
+function handleExtraFieldClick() {
+    addLine();
+}
+
+function handleRemoveLineClick() {
+    removeLastLine();
+}
+
+function handleDemoClick() {
+    Persons.push(new Person(createPersonID(), "Klumpner", "Lehrer", "Default", "Herr"));
+    Persons.push(new Person(createPersonID(), "Dollinger", "Lehrer", "Default", "Herr"));
+    Persons.push(new Person(createPersonID(), "Paula", "Schüler", "Default", null, "Jakob"));
+    Persons.push(new Person(createPersonID(), "Fürst", "Schüler", "Default", null , "Felix"));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[0].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Ihr passt doch sowieso nicht auf!"`));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3], `"MAAAAAAAN`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID(), QuoteLines[4].getID()]));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2], `"Ich brauch mehr Spucke im Rachen"`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2], `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6]]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[7]]));
+}
+
 function startUp(){
     overlay = document.getElementById('overlay');
     openBtn = document.getElementById('openBtn');
@@ -187,76 +256,36 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
-    avatarInput = document.getElementById("AvatarInput")
+    avatarInput = document.getElementById("AvatarInput");
     DemoBtn = document.getElementById("DemoBtn");
+    removeLineBtn = document.getElementById("removeLineBtn");
 
-    openBtn.addEventListener('click', () => {
-        overlay.classList.add('active');
-    });
+    openBtn.removeEventListener('click', handleOpenClick);
+    openBtn.addEventListener('click', handleOpenClick);
 
-    closeXBtn.addEventListener('click', () => {
-        overlay.classList.remove('active');
-    });
+    closeXBtn.removeEventListener('click', handleCloseClick);
+    closeXBtn.addEventListener('click', handleCloseClick);
 
-    overlay.addEventListener('click', (event) => {
-        if (event.target === overlay) {
-            overlay.classList.remove('active');
-        }
-    });
+    overlay.removeEventListener('click', handleOverlayClick);
+    overlay.addEventListener('click', handleOverlayClick);
 
-    saveBtn.addEventListener('click', () => {
-        const lines = collectLines();
-        let ids = [];
-        for (let i of lines){
-            QuoteLines.add(i);
-            ids.add(i.getID());
-        }
-        saveLines();
-        Quotes.add(new Quote(createQuoteID(), ids));
-        saveQuotes();
-    });
+    saveBtn.removeEventListener('click', handleSaveClick);
+    saveBtn.addEventListener('click', handleSaveClick);
 
-    saveAllBtn.addEventListener('click', () =>{
-        saveAll();
-    })
+    saveAllBtn.removeEventListener('click', handleSaveAllClick);
+    saveAllBtn.addEventListener('click', handleSaveAllClick);
 
-    resetBtn.addEventListener('click', () => {
-        reset();
-    })
+    resetBtn.removeEventListener('click', handleResetClick);
+    resetBtn.addEventListener('click', handleResetClick);
 
-    extraFieldBtn.addEventListener('click', () => {
-        addLine();
-    });
+    extraFieldBtn.removeEventListener('click', handleExtraFieldClick);
+    extraFieldBtn.addEventListener('click', handleExtraFieldClick);
 
-    removeLineBtn.addEventListener('click', () => {
-        removeLastLine();
-    })
+    removeLineBtn.removeEventListener('click', handleRemoveLineClick);
+    removeLineBtn.addEventListener('click', handleRemoveLineClick);
 
-    DemoBtn.addEventListener('click', () => {
-        Persons.push(new Person(createPersonID(), "Klumpner", "Lehrer", "Default", "Herr"));
-        Persons.push(new Person(createPersonID(), "Dollinger", "Lehrer", "Default", "Herr"));
-        Persons.push(new Person(createPersonID(), "Paula", "Schüler", "Default", null, "Jakob"));
-        Persons.push(new Person(createPersonID(), "Fürst", "Schüler", "Default", null , "Felix"));
-
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
-        Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
-        Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
-
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Ihr passt doch sowieso nicht auf!"`));
-        Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID()]));
-
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[4].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[4], `"MAAAAAAAN`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
-        Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
-        Quotes.push(new Quote(createQuoteID(), [QuoteLines[4].getID(), QuoteLines[5].getID()]));
-
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[3], `"Ich brauch mehr Spucke im Rachen"`));
-        QuoteLines.push(new QuoteLine(createLineID(), Persons[3], `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
-        Quotes.push(new Quote(createQuoteID(), [QuoteLines[7]]));
-        Quotes.push(new Quote(createQuoteID(), [QuoteLines[8]]));
-    })
+    DemoBtn.removeEventListener('click', handleDemoClick);
+    DemoBtn.addEventListener('click', handleDemoClick);
 
     renderCollapsibles();
 }
@@ -297,15 +326,15 @@ export function showImg(){
 }
 
 function createLineID(){
-    return QuoteLines.length() + 1;
+    return QuoteLines.length + 1;
 }
 
 function createQuoteID(){
-    return Quotes.length() + 1;
+    return Quotes.length + 1;
 }
 
 function renderCollapsibles(){
-    for (let h of Persons.length){
+    for (let h of Persons){
         const colls = document.getElementById("Collapsibles");
         const newColl = document.createElement("div");
         const PID = h.getID();
@@ -313,29 +342,29 @@ function renderCollapsibles(){
         const PName = h.getName();
         const QCOunt = collectQuotes(PID).length;
         newColl.id(`Collapsible${PID}`);
-        newColl.innerHTML(`
+        newColl.innerHTML = `
             <button type="button" class="collapsible">
                 <img src="${PPic}" height="50">
                 <p class="name">${PName}</p>
                 <p class="quoteCount">${QCOunt}</p>
             </button>
-            <div class="content" id="quotes${PName}></div>
-        `)
+            <div class="content" id="quotes${PName}"></div>
+        `;
         
         const content = document.getElementById(`quotes${PName}`)
         for (let quotes of collectQuotes(PID)){
             const newQuote = document.createElement("div");
             const lines = quotes.getLines();
-            const tempQuotes = "";
+            let tempQuotes = "";
             if (lines.length > 1){
                 for (let lins of lines){
                     tempQuotes += `<p>${Persons[PID].getName()} ${lins.assembleMultiple()}</p> <br>`
                 }
-                newQuote.innerHTML(tempQuotes);
+                newQuote.innerHTML = tempQuotes;
             } else {
-                newQuote.innerHTML(`
+                newQuote.innerHTML = `
                     <p>${lines[1].assemble()}</p> <br>
-                `);
+                `;
             }
             
         }
