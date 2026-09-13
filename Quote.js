@@ -5,6 +5,10 @@ export class Quote {
         this.lines = LINES;
     }
 
+    getLines(){
+        return this.lines;
+    }
+
     static fromJSON(obj){
         return new Quote(obj.id, obj.lines)
     }

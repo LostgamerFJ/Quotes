@@ -272,6 +272,52 @@ function createQuoteID(){
     return Quotes.length() + 1;
 }
 
+function renderCollapsibles(){
+    for (let h of Persons.length){
+        const colls = document.getElementById("Collapsibles");
+        const newColl = document.createElement("div");
+        const PID = h.getID();
+        const PPic = h.getSrc();
+        const PName = h.getName();
+        newColl.id(`Collapsible${PID}`);
+        newColl.innerHTML(`
+            <button type="button" class="collapsible">
+                <img src="${PPic}" height="50">
+                <p class="name">${PName}</p>
+                <p class="quoteCount">50</p>
+            </button>
+            <div class="content" id="quotes${PName}>
+            </div>
+        `)
+        
+        const content = document.getElementById(`quotes${PName}`)
+        for (let quotes of collectQuotes(PID)){
+            const newQuote = document.createElement("div");
+            const lines = quotes.getLines();
+            
+            for (let lins of lines){
+
+            }
+            newQuote.innerHTML();
+        }
+
+        colls.insertBefore(newColl, document.getElementById("bottom"))
+    }
+}
+
+function collectQuotes(personID){
+    const TempQuotes = []
+    for (let quote of Quotes) {
+        const lines = quote.getLines();
+        for (let LINES of lines){
+            if (LINES.getPID() == personID && !TempQuotes.includes(quote)){
+                TempQuotes.push(quote);
+            }
+        }
+    }
+    return TempQuotes;
+}
+
 init();
 addLine();
 startUp();

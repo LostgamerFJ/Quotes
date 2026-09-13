@@ -13,6 +13,18 @@ export class Person {
         this.picUrl = picPath;
     }
 
+    getID(){
+        return this.id
+    }
+
+    getSrc(){
+        return this.picUrl;
+    }
+
+    getName(){
+        return this.firstName ? this.firstName + ' ' + this.lastName : this.salutation + ' ' + this.lastName
+    }
+
     static fromJSON(obj){
         return new Person(obj.id, obj.salutation, obj.firstName, obj.lastName, obj.tag, obj.picUrl)
     }

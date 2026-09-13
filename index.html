@@ -6,20 +6,22 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <div>
-            <div id="PersonCollapsible">    
+        <div id="Collapsibles">
+            <div id="Collapsible">    
                 <button type="button" class="collapsible">
                     <img src="./assets/Portrait_Placeholder.png" height="50">
                     <p class="name">Herr Klumpner</p>
                     <p class="quoteCount">50</p>
                 </button>
-                <div class="content">
+                <div class="content" id="">
                     <p>Test</p>
                 </div>
             </div>
         </div>
-
-        <button id="openBtn">Neues Zitat</button>
+        <div id="bottom">
+            <button id="openBtn">Neues Zitat</button>
+            <button id="saveAllBtn">Speichern</button>
+        </div>
 
         <div class="overlay" id="overlay">
             <div class="quote-popup" id="quote-popup">
@@ -38,7 +40,7 @@
             </div>
         </div>
 
-        <button id="saveAllBtn">Speichern</button>
+        
 
         <script type="module" src="app.js"></script>        
     </body>

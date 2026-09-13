@@ -16,4 +16,8 @@ export class QuoteLine {
         return this.id;
     }
 
+    getPID(){
+        return this.personId;
+    }
+
 }
