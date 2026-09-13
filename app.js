@@ -109,7 +109,7 @@ function collectLines() {
         const quoteField = document.getElementById(`Quote${suffix}`);
         const contextField = document.getElementById(`Context${suffix}`);
 
-        lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), notesField.value, quoteField.value, contextField.value));
+        lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), quoteField.value, notesField.value, contextField.value));
     }
 
     return lines;
@@ -238,14 +238,14 @@ function handleDemoClick() {
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
 
     QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[3], `"MAAAAAAAN`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), `"MAAAAAAAN`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID(), QuoteLines[4].getID()]));
 
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[2], `"Ich brauch mehr Spucke im Rachen"`));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[2], `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6]]));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[7]]));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Ich brauch mehr Spucke im Rachen"`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[7].getID()]));
 }
 
 function startUp(){
@@ -326,11 +326,11 @@ export function showImg(){
 }
 
 function createLineID(){
-    return QuoteLines.length + 1;
+    return QuoteLines.length;
 }
 
 function createQuoteID(){
-    return Quotes.length + 1;
+    return Quotes.length;
 }
 
 function renderCollapsibles(){
@@ -341,7 +341,7 @@ function renderCollapsibles(){
         const PPic = h.getSrc();
         const PName = h.getName();
         const QCOunt = collectQuotes(PID).length;
-        newColl.id(`Collapsible${PID}`);
+        newColl.id = `Collapsible${PID}`;
         newColl.innerHTML = `
             <button type="button" class="collapsible">
                 <img src="${PPic}" height="50">
@@ -358,12 +358,12 @@ function renderCollapsibles(){
             let tempQuotes = "";
             if (lines.length > 1){
                 for (let lins of lines){
-                    tempQuotes += `<p>${Persons[PID].getName()} ${lins.assembleMultiple()}</p> <br>`
+                    tempQuotes += `<p>${Persons[PID - 1].getName()} ${lins.assembleMultiple()}</p> <br>`
                 }
                 newQuote.innerHTML = tempQuotes;
             } else {
                 newQuote.innerHTML = `
-                    <p>${lines[1].assemble()}</p> <br>
+                    <p>${lines[0].assemble()}</p> <br>
                 `;
             }
             
@@ -386,6 +386,10 @@ function collectQuotes(personID){
     return TempQuotes;
 }
 
-init();
-addLine();
-startUp();
+async function main() {
+    await init();
+    addLine();
+    startUp();
+}
+
+main();

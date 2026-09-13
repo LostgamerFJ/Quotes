@@ -4,17 +4,6 @@ import { Person } from "./Person.js";
 export function openPersonPopup() {
     const overlay = document.createElement('div');
     overlay.className = 'person-popup-overlay';
-
-    const Salutation = document.getElementById("SalutationDropdown");
-    const FirstName = document.getElementById("FirstName");
-    const LastName = document.getElementById("LastName");
-    const Tag = document.getElementById("TagDropdown");
-    const Avatar = document.getElementById("AvatarInput");
-
-    const resetBtn = document.getElementById("resetPerson");
-    const cancelBtn = document.getElementById("newPersonCancel");
-    const saveBtn = document.getElementById("newPersonSave");
-
     overlay.innerHTML = `
         <div class="person-popup">
             <h2>Neue Person</h2>
@@ -60,6 +49,16 @@ export function openPersonPopup() {
         </div>
     `;
 
+    const Salutation = document.getElementById("SalutationDropdown");
+    const FirstName = document.getElementById("FirstName");
+    const LastName = document.getElementById("LastName");
+    const Tag = document.getElementById("TagDropdown");
+    const Avatar = document.getElementById("AvatarInput");
+
+    const resetBtn = document.getElementById("resetPerson");
+    const cancelBtn = document.getElementById("newPersonCancel");
+    const saveBtn = document.getElementById("newPersonSave");
+
     document.body.appendChild(overlay);
 
     const closePopup = () => {
@@ -104,5 +103,5 @@ function reset(){
 }
 
 export function createPersonID(){
-    return Persons.length + 1
+    return Persons.length;
 }

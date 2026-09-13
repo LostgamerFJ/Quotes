@@ -7,7 +7,7 @@ export class Person {
         this.lastName = LASTNAME;
         this.tag = TAG;
         if (PICURL === "Default"){
-            this.picUrl = ".assets/Portrait_Placeholder.png";
+            this.picUrl = "./assets/Portrait_Placeholder.png";
         } else {
             this.picUrl = PICURL;
         }

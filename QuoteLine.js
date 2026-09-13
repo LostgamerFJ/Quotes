@@ -21,7 +21,7 @@ export class QuoteLine {
     }
 
     assemble(){
-        const QuoteString = "";
+        let QuoteString = "";
         if (this.notes != null){
             QuoteString += this.notes + " ";
         }
