@@ -1,12 +1,26 @@
+import { QuoteLines } from "./app";
+
 export class Quote {
 
-    constructor(ID, LINES = []){
+    constructor(ID, LINEIDS = []){
         this.id = ID;
-        this.lines = LINES;
+        this.lineIds = LINEIDS;
+    }
+
+    getLineIDs(){
+        return this.lineIds;
     }
 
     getLines(){
-        return this.lines;
+        let Lines = []
+        for (let lines of QuoteLines){
+            for (let LineIds of this.lineIds){
+                if (LineIds === lines.getID()){
+                    Lines.push(lines);
+                }
+            }
+        }
+        return Lines;
     }
 
     static fromJSON(obj){

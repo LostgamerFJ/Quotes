@@ -7,7 +7,7 @@ import { createPersonID } from './Person_Popup.js';
 const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
 
 export let Persons = [];
-let QuoteLines = [];
+export let QuoteLines = [];
 let Quotes = [];
 
 export let PersonCounter = null;
@@ -127,6 +127,7 @@ function reset(){
             <button class="btn-primary" id="saveBtn">Speichern</button>
         </div>
     `;
+    personDropdowns.clear();
     startUp();
 }
 
@@ -171,6 +172,8 @@ function removeLastLine(){
     if (!lastLine) return;
     if (lines.length == 1) return;
     lastLine.remove();
+    const suffix = personDropdowns.keys()
+    personDropdowns.delete(suffix[suffix.length - 1])
     lineCount--;
 }
 
@@ -364,6 +367,8 @@ function renderCollapsibles(){
             }
             
         }
+
+        content.appendChild(newQuote);
 
         colls.insertBefore(newColl, document.getElementById("bottom"))
     }

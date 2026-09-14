@@ -1,8 +1,10 @@
 import { savePersons, Persons, PersonCounter, showImg } from "./app.js";
 import { Person } from "./Person.js";
 
+let overlay = null;
+
 export function openPersonPopup() {
-    const overlay = document.createElement('div');
+    overlay = document.createElement('div');
     overlay.className = 'person-popup-overlay';
     overlay.innerHTML = `
         <div class="person-popup">
