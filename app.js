@@ -248,7 +248,7 @@ function handleDemoClick() {
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
 
     QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), `"MAAAAAAAN`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), `"MAAAAAAAN"`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID(), QuoteLines[4].getID()]));
 
@@ -256,6 +256,8 @@ function handleDemoClick() {
     QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
     Quotes.push(new Quote(createQuoteID(), [QuoteLines[7].getID()]));
+
+    renderCollapsibles();
 }
 
 function startUp(){
@@ -367,26 +369,32 @@ function renderCollapsibles(){
             </button>
             <div class="content" id="quotes${PID}"></div>
         `;
+
+        colls.append(newColl);
         
         const content = document.getElementById(`quotes${PID}`)
+        let quotesDone = 0;
         for (let quotes of collectQuotes(PID)){
+            quotesDone ++;
             const newQuote = document.createElement("div");
             const lines = quotes.getLines();
             let tempQuotes = "";
             if (lines.length > 1){
                 for (let lins of lines){
-                    tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p> <br>`
+                    tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
                 }
                 newQuote.innerHTML = tempQuotes;
+            } else if (quotesDone == collectQuotes(PID).length){
+                newQuote.innerHTML = `
+                    <p>${lines[0].assemble()}</p>
+                `;
             } else {
                 newQuote.innerHTML = `
-                    <p>${lines[0].assemble()}</p> <br>
+                    <p>${lines[0].assemble()}</p> <hr>
                 `;
             }
             content.appendChild(newQuote);
         }
-
-        colls.insertBefore(newColl, document.getElementById("bottom"))
     }
     var coll = document.getElementsByClassName("collapsible");
 
