@@ -172,7 +172,7 @@ function removeLastLine(){
     if (!lastLine) return;
     if (lines.length == 1) return;
     lastLine.remove();
-    const suffix = personDropdowns.keys()
+    const suffix = Array.from(personDropdowns.keys());
     personDropdowns.delete(suffix[suffix.length - 1])
     lineCount--;
 }
@@ -347,17 +347,17 @@ function renderCollapsibles(){
                 <p class="name">${PName}</p>
                 <p class="quoteCount">${QCOunt}</p>
             </button>
-            <div class="content" id="quotes${PName}"></div>
+            <div class="content" id="quotes${PID}"></div>
         `;
         
-        const content = document.getElementById(`quotes${PName}`)
+        const content = document.getElementById(`quotes${PID}`)
         for (let quotes of collectQuotes(PID)){
             const newQuote = document.createElement("div");
             const lines = quotes.getLines();
             let tempQuotes = "";
             if (lines.length > 1){
                 for (let lins of lines){
-                    tempQuotes += `<p>${Persons[PID].getName()} ${lins.assembleMultiple()}</p> <br>`
+                    tempQuotes += `<p>${PName} ${lins.assembleMultiple()}</p> <br>`
                 }
                 newQuote.innerHTML = tempQuotes;
             } else {
@@ -365,10 +365,8 @@ function renderCollapsibles(){
                     <p>${lines[0].assemble()}</p> <br>
                 `;
             }
-            
+            content.appendChild(newQuote);
         }
-
-        content.appendChild(newQuote);
 
         colls.insertBefore(newColl, document.getElementById("bottom"))
     }

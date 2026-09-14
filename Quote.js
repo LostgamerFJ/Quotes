@@ -1,4 +1,4 @@
-import { QuoteLines } from "./app";
+import { QuoteLines } from "./app.js";
 
 export class Quote {
 
