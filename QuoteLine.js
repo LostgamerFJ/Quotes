@@ -24,7 +24,7 @@ export class QuoteLine {
 
     getPerson(){
         for (let prsns of Persons){
-            if (prsns.getID() === this.personId){
+            if (prsns.getID() == this.personId){
                 return prsns;
             }
         }

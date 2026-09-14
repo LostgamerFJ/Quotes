@@ -2,7 +2,6 @@ import { Quote } from './Quote.js';
 import { QuoteLine } from './QuoteLine.js';
 import { Person } from './Person.js';
 import { createPersonDropdown, getSelectedPersonId } from './Person_Dropdown.js';
-import { createPersonID } from './Person_Popup.js';
 
 const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
 
@@ -376,7 +375,7 @@ function renderCollapsibles(){
             let tempQuotes = "";
             if (lines.length > 1){
                 for (let lins of lines){
-                    tempQuotes += `<p>${lins.getName()} ${lins.assembleMultiple()}</p> <br>`
+                    tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p> <br>`
                 }
                 newQuote.innerHTML = tempQuotes;
             } else {
