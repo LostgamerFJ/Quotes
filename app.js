@@ -74,10 +74,6 @@ async function getAll() {
         loadRoute("Quotes"),
     ]);
 
-    console.log("personsRaw:", personsRaw, Array.isArray(personsRaw));
-    console.log("quoteLinesRaw:", quoteLinesRaw, Array.isArray(quoteLinesRaw));
-    console.log("quotesRaw:", quotesRaw, Array.isArray(quotesRaw));
-
     Persons = (personsRaw || []).map(p => Person.fromJSON(p));
     PersonCounter = Persons.length;
     QuoteLines = (quoteLinesRaw || []).map(z => QuoteLine.fromJSON(z));
@@ -219,6 +215,7 @@ function handleSaveClick() {
     saveLines();
     Quotes.push(new Quote(createQuoteID(), ids));
     saveQuotes();
+    overlay.classList.remove('active');
 }
 
 function handleSaveAllClick() {
@@ -427,8 +424,6 @@ function collectQuotes(personID){
     }
     return TempQuotes;
 }
-
-console.log(location.origin)
 
 addLine();
 startUp();
