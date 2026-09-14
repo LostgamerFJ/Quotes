@@ -53,6 +53,20 @@ async function saveRoute(route, array) {
     }
 }
 
+export async function uploadAvatar(file, filename) {
+    const response = await fetch(`${WORKER_URL}/Pics/${encodeURIComponent(filename)}`, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+    });
+
+    if (!response.ok) {
+        throw new Error(`Fehler beim Hochladen von ${filename}: ${response.status}`);
+    }
+
+    return `${WORKER_URL}/Pics/${encodeURIComponent(filename)}`;
+}
+
 async function getAll() {
     const [personsRaw, quoteLinesRaw, quotesRaw] = await Promise.all([
         loadRoute("Persons"),

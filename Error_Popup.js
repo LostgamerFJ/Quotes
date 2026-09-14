@@ -15,11 +15,15 @@ export function openErrorPopup(errMsg) {
         </div>
     `;
 
-    const okayBtn = document.getElementById("Okay");
-
     document.body.appendChild(overlay);
 
-    overlay.querySelector('#newPersonCancel').addEventListener('click', closePopup);
+    const okayBtn = document.getElementById("Okay");
+
+    const closePopup = () => {
+        overlay.remove();
+    };
+
+    overlay.querySelector('#Okay').addEventListener('click', closePopup);
 
     overlay.addEventListener('click', (event) => {
         if (event.target === overlay) {

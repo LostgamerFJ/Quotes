@@ -1,4 +1,4 @@
-import { savePersons, Persons, createPersonID, showImg } from "./app.js";
+import { savePersons, Persons, createPersonID, showImg, uploadAvatar } from "./app.js";
 import { Person } from "./Person.js";
 import { openErrorPopup } from "./Error_Popup.js";
 
@@ -52,6 +52,8 @@ export function openPersonPopup() {
         </div>
     `;
 
+    document.body.appendChild(overlay);
+
     const Salutation = document.getElementById("SalutationDropdown");
     const FirstName = document.getElementById("FirstName");
     const LastName = document.getElementById("LastName");
@@ -61,8 +63,6 @@ export function openPersonPopup() {
     const resetBtn = document.getElementById("resetPerson");
     const cancelBtn = document.getElementById("newPersonCancel");
     const saveBtn = document.getElementById("newPersonSave");
-
-    document.body.appendChild(overlay);
 
     const closePopup = () => {
         overlay.remove();
@@ -88,20 +88,36 @@ export function openPersonPopup() {
         closePopup();
     })
 
-    saveBtn.addEventListener('click', () => {
-        if (Salutation.value === "" && FirstName.value === ""){
-            openErrorPopup("Bite gib entweder eine Anrede oder einen Vornamen an.")
-        } else if (Salutation.value !== "" && FirstName.value !== ""){
-            openErrorPopup("Bite gib entweder eine Anrede oder einen Vornamen an.")
-        } else if (FirstName.value === ""){
-            Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `./assets/${Avatar.value}`, Salutation.value, null));
-        } else if (Salutation.value === ""){
-            Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `./assets/${Avatar.value}`, null, FirstName.value));
+    saveBtn.addEventListener('click', async () => {
+        if (Salutation.value === "" && FirstName.value === "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
+            return;
+        } else if (Salutation.value !== "" && FirstName.value !== "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
+            return;
         }
-        
+
+        const person = (FirstName.value === "")
+            ? new Person(createPersonID(), LastName.value, Tag.value, "Default", Salutation.value, null)
+            : new Person(createPersonID(), LastName.value, Tag.value, "Default", null, FirstName.value);
+
+        const file = Avatar.files[0];
+        if (file) {
+            const extension = file.name.split('.').pop();
+            const filename = `${person.getName()}.${extension}`;
+            try {
+                const picUrl = await uploadAvatar(file, filename);
+                person.changePic(picUrl);
+            } catch (err) {
+                console.error(err);
+                openErrorPopup("Bild konnte nicht hochgeladen werden.");
+            }
+        }
+
+        Persons.push(person);
         savePersons();
         closePopup();
-    })
+    });
 }
 
 function reset(){
