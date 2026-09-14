@@ -24,7 +24,6 @@ let saveBtn = null;
 let saveAllBtn = null;
 let extraFieldBtn = null;
 let resetBtn = null;
-let avatarInput = null;
 let removeLineBtn = null;
 let DemoBtn = null;
 
@@ -268,7 +267,6 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
-    avatarInput = document.getElementById("AvatarInput");
     DemoBtn = document.getElementById("DemoBtn");
     removeLineBtn = document.getElementById("removeLineBtn");
 
