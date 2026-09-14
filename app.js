@@ -32,11 +32,13 @@ await init();
 async function loadRoute(route) {
     const response = await fetch(`${WORKER_URL}/${route}`);
 
-    if (!response.ok){
+    if (!response.ok) {
         throw new Error(`Fehler beim Laden von ${route}: ${response.status}`);
     }
 
-    return await response.json();
+    const text = await response.text();
+
+    return text.trim() ? JSON.parse(text) : [];
 }
 
 async function saveRoute(route, array) {
