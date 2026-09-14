@@ -115,7 +115,7 @@ function collectLines() {
         const quoteField = document.getElementById(`Quote${suffix}`);
         const contextField = document.getElementById(`Context${suffix}`);
 
-        lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), quoteField.value, notesField.value, contextField.value));
+        lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, notesField.value, contextField.value));
     }
 
     return lines;
