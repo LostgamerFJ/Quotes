@@ -416,5 +416,7 @@ function collectQuotes(personID){
     return TempQuotes;
 }
 
+console.log(location.origin)
+
 addLine();
 startUp();
