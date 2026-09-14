@@ -74,6 +74,10 @@ async function getAll() {
         loadRoute("Quotes"),
     ]);
 
+    console.log("personsRaw:", personsRaw, Array.isArray(personsRaw));
+    console.log("quoteLinesRaw:", quoteLinesRaw, Array.isArray(quoteLinesRaw));
+    console.log("quotesRaw:", quotesRaw, Array.isArray(quotesRaw));
+
     Persons = (personsRaw || []).map(p => Person.fromJSON(p));
     PersonCounter = Persons.length;
     QuoteLines = (quoteLinesRaw || []).map(z => QuoteLine.fromJSON(z));
