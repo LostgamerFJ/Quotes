@@ -133,7 +133,7 @@ function reset(){
 
 function addLine(){
     const newLine = document.createElement('div');
-    newLine.classList = 'field-line field-line-quote';
+    newLine.className = 'field-line field-line-quote';
     newLine.id = `field-line${lineCount}`
     newLine.innerHTML = `
         <div class="field field-person">
@@ -332,6 +332,11 @@ function createQuoteID(){
     return QuoteCounter;
 }
 
+export function createPersonID(){
+    PersonCounter ++;
+    return PersonCounter;
+}
+
 function renderCollapsibles(){
     for (let h of Persons){
         const colls = document.getElementById("Collapsibles");
@@ -357,7 +362,7 @@ function renderCollapsibles(){
             let tempQuotes = "";
             if (lines.length > 1){
                 for (let lins of lines){
-                    tempQuotes += `<p>${PName} ${lins.assembleMultiple()}</p> <br>`
+                    tempQuotes += `<p>${lins.getName()} ${lins.assembleMultiple()}</p> <br>`
                 }
                 newQuote.innerHTML = tempQuotes;
             } else {

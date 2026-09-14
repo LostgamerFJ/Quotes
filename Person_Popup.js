@@ -1,5 +1,6 @@
-import { savePersons, Persons, PersonCounter, showImg } from "./app.js";
+import { savePersons, Persons, createPersonID, showImg } from "./app.js";
 import { Person } from "./Person.js";
+import { openErrorPopup } from "./Error_Popup.js";
 
 let overlay = null;
 
@@ -21,7 +22,7 @@ export function openPersonPopup() {
                     <select id="SalutationDropdown">
                         <option value="Herr">Herr</option>
                         <option value="Frau">Frau</option>
-                        <option value="null">Keine Anrede</option>
+                        <option value="">Keine Anrede</option>
                     </select>
                 </div>
                 <div class="field field-notes">
@@ -88,7 +89,14 @@ export function openPersonPopup() {
     })
 
     saveBtn.addEventListener('click', () => {
-        Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `./assets/${Avatar.value}`, Salutation.value, FirstName.value))
+        if (Salutation.value === "" && FirstName.value === ""){
+            openErrorPopup("Bite gib entweder eine Anrede oder einen Vornamen an.")
+        } else if (FirstName.value === ""){
+            Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `./assets/${Avatar.value}`, Salutation.value, null));
+        } else if (Salutation.value === ""){
+            Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `./assets/${Avatar.value}`, null, FirstName.value));
+        }
+        
         savePersons();
         closePopup();
     })
@@ -97,9 +105,4 @@ export function openPersonPopup() {
 function reset(){
     overlay.remove();
     openPersonPopup();
-}
-
-export function createPersonID(){
-    PersonCounter ++;
-    return PersonCounter;
 }

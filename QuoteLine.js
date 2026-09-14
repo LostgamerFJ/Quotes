@@ -1,3 +1,5 @@
+import { Persons } from "./app.js";
+
 export class QuoteLine {
 
     constructor(ID, PID, QUOTE, NOTES = null, CONTEXT = null){
@@ -18,6 +20,14 @@ export class QuoteLine {
 
     getPID(){
         return this.personId;
+    }
+
+    getPerson(){
+        for (let prsns of Persons){
+            if (prsns.getID() === this.personId){
+                return prsns;
+            }
+        }
     }
 
     assemble(){
