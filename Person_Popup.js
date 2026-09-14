@@ -91,6 +91,8 @@ export function openPersonPopup() {
     saveBtn.addEventListener('click', () => {
         if (Salutation.value === "" && FirstName.value === ""){
             openErrorPopup("Bite gib entweder eine Anrede oder einen Vornamen an.")
+        } else if (Salutation.value !== "" && FirstName.value !== ""){
+            openErrorPopup("Bite gib entweder eine Anrede oder einen Vornamen an.")
         } else if (FirstName.value === ""){
             Persons.push(new Person(createPersonID(), LastName.value, Tag.value, `./assets/${Avatar.value}`, Salutation.value, null));
         } else if (Salutation.value === ""){
