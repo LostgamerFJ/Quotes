@@ -29,6 +29,10 @@ export class Person {
         return this.firstName ? this.firstName + ' ' + this.lastName : this.salutation + ' ' + this.lastName
     }
 
+    getTag(){
+        return this.tag;
+    }
+
     static fromJSON(obj){
         return new Person(obj.id, obj.lastName, obj.tag, obj.picUrl, obj.salutation, obj.firstName);
     }

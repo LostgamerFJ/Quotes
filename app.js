@@ -25,7 +25,6 @@ let saveAllBtn = null;
 let extraFieldBtn = null;
 let resetBtn = null;
 let removeLineBtn = null;
-let DemoBtn = null;
 
 await init();
 
@@ -252,34 +251,6 @@ function handleRemoveLineClick() {
     removeLastLine();
 }
 
-function handleDemoClick() {
-    Persons.push(new Person(createPersonID(), "Klumpner", "Lehrer", "Default", "Herr"));
-    Persons.push(new Person(createPersonID(), "Dollinger", "Lehrer", "Default", "Herr"));
-    Persons.push(new Person(createPersonID(), "Paula", "Schüler", "Default", null, "Jakob"));
-    Persons.push(new Person(createPersonID(), "Fürst", "Schüler", "Default", null , "Felix"));
-
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[0].getID()]));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
-
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Ihr passt doch sowieso nicht auf!"`));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
-
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), `"MAAAAAAAN"`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID(), QuoteLines[4].getID()]));
-
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Ich brauch mehr Spucke im Rachen"`));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[7].getID()]));
-
-    renderCollapsibles();
-}
-
 function startUp(){
     overlay = document.getElementById('overlay');
     openBtn = document.getElementById('openBtn');
@@ -288,7 +259,6 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
-    DemoBtn = document.getElementById("DemoBtn");
     removeLineBtn = document.getElementById("removeLineBtn");
 
     openBtn.removeEventListener('click', handleOpenClick);
@@ -314,9 +284,6 @@ function startUp(){
 
     removeLineBtn.removeEventListener('click', handleRemoveLineClick);
     removeLineBtn.addEventListener('click', handleRemoveLineClick);
-
-    DemoBtn.removeEventListener('click', handleDemoClick);
-    DemoBtn.addEventListener('click', handleDemoClick);
 }
 
 async function init() {
@@ -370,8 +337,13 @@ export function createPersonID(){
 }
 
 function renderCollapsibles(){
+    let colls;
     for (let h of Persons){
-        const colls = document.getElementById("Collapsibles");
+        if (h.getTag() == "Teacher"){
+            colls = document.getElementById("TeacherCollapsibles");
+        } else if (h.getTag() == "Student"){
+            colls = document.getElementById("StudentCollapsibles");
+        }
         const newColl = document.createElement("div");
         const PID = h.getID();
         const PPic = h.getSrc();

@@ -81,12 +81,13 @@ body {
     color: #444;
     cursor: pointer;
     padding: 18px;
-    width: 100%;
+    width: 70%;
     border: none;
     outline: none;
     font-size: 15px;
     display: flex;
     align-items: center;
+    align-self: center;
     justify-content: space-between;
 }
 
