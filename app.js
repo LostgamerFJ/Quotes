@@ -117,18 +117,26 @@ function collectLines() {
         const quoteField = document.getElementById(`Quote${suffix}`);
         const contextField = document.getElementById(`Context${suffix}`);
 
-        lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, notesField.value, contextField.value));
+        if (!notesField.value && contextField.value) {
+            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, notesField.value, `(${contextField.value})`));
+        } else if (!contextField.value && notesField.value){
+            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, contextField.value));
+        } else if (!notesField.value && !contextField.value){
+            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`));
+        } else {
+            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, `(${contextField.value})`));
+        }
+
+        
     }
 
     return lines;
 }
 
-function reset(){
+function resetPopup(){
     lineCount = 0;
     document.getElementById("quote-popup").innerHTML = `
         <h2>Neues Zitat</h2>
-
-        <div class="field-line"></div>
 
         <div class="left-action">
             <button class="btn-seamless" id="extraFieldBtn">+ Weitere Zeile</button>
@@ -143,6 +151,14 @@ function reset(){
     `;
     personDropdowns.clear();
     startUp();
+    addLine();
+}
+
+function fullReset(){
+    document.getElementById("Collapsibles").innerHTML = ``;
+    resetPopup();
+    startUp();
+    renderCollapsibles();
 }
 
 function addLine(){
@@ -156,15 +172,15 @@ function addLine(){
         </div>
         <div class="field field-notes">
             <label for="Notes${lineCount}">Notiz</label>
-            <textarea lines="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
+            <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
         </div>
         <div class="field field-quote">
             <label for="Quote${lineCount}">Zitat</label>
-            <textarea lines="1" id="Quote${lineCount}"></textarea>
+            <textarea rows="1" id="Quote${lineCount}"></textarea>
         </div>
         <div class="field field-context">
             <label for="Context${lineCount}">Kontext</label>
-            <textarea lines="1" id="Context${lineCount}" placeholder="Optional"></textarea>
+            <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
         </div>
     `;
 
@@ -216,6 +232,8 @@ function handleSaveClick() {
     Quotes.push(new Quote(createQuoteID(), ids));
     saveQuotes();
     overlay.classList.remove('active');
+    saveAll();
+    fullReset();
 }
 
 function handleSaveAllClick() {
@@ -223,7 +241,7 @@ function handleSaveAllClick() {
 }
 
 function handleResetClick() {
-    reset();
+    resetPopup();
 }
 
 function handleExtraFieldClick() {
@@ -299,8 +317,6 @@ function startUp(){
 
     DemoBtn.removeEventListener('click', handleDemoClick);
     DemoBtn.addEventListener('click', handleDemoClick);
-
-    renderCollapsibles();
 }
 
 async function init() {
@@ -427,3 +443,4 @@ function collectQuotes(personID){
 
 addLine();
 startUp();
+renderCollapsibles();

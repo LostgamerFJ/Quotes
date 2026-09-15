@@ -27,11 +27,11 @@ export function openPersonPopup() {
                 </div>
                 <div class="field field-notes">
                     <label for="FirstName">Vorname</label>
-                    <textarea lines="1" id="FirstName"></textarea>
+                    <textarea rows="1" id="FirstName"></textarea>
                 </div>
                 <div class="field field-notes">
                     <label for="LastName">Nachname</label>
-                    <textarea lines="1" id="LastName"></textarea>
+                    <textarea rows="1" id="LastName"></textarea>
                 </div>
                 <div class="field">
                     <label for="TagDropdown">Typ</label>
