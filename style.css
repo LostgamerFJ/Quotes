@@ -394,4 +394,13 @@ body {
     font-size: 15px;
     cursor: pointer;
 }
-#openBtn:hover { background: var(--teal-dark); }
+#openBtn:hover { 
+    background: var(--teal-dark); 
+}
+
+#StudentCollapsibles {
+    align-items: center;
+}
+#TeacherCollapsibles {
+    align-items: center;
+}
