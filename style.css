@@ -112,6 +112,9 @@ body {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.2s ease-out;
+    width: 70%;
+    align-self: center;
+    text-align: center;
 }
 
 .field {
