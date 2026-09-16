@@ -406,7 +406,9 @@ body {
 
 #StudentCollapsibles {
     align-items: center;
+    align-self: center;
 }
 #TeacherCollapsibles {
     align-items: center;
+    align-self: center;
 }
