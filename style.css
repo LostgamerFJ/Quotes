@@ -3,6 +3,7 @@ body {
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     min-height: 100vh;
     margin: 0;
+    align-items: center;
 }
 
 /* ===== Classes ===== */
