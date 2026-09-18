@@ -9,11 +9,15 @@ export let Persons = [];
 export let QuoteLines = [];
 let Quotes = [];
 
+let activePersonIDs = [];
+
 export let PersonCounter = null;
 let LineCounter = null;
 let QuoteCounter = null;
 
 let lineCount = 0;
+
+let ShowNums = false;
 
 const personDropdowns = new Map();
 
@@ -25,6 +29,7 @@ let saveAllBtn = null;
 let extraFieldBtn = null;
 let resetBtn = null;
 let removeLineBtn = null;
+let ToggleLineNumsBtn = null;
 
 await init();
 
@@ -40,11 +45,15 @@ async function loadRoute(route) {
     return text.trim() ? JSON.parse(text) : [];
 }
 
+function formatArray(array) {
+    return "[\n" + array.map(obj => JSON.stringify(obj)).join(",\n") + "\n]";
+}
+
 async function saveRoute(route, array) {
     const response = await fetch(`${WORKER_URL}/${route}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(array),
+        body: formatArray(array),
     });
 
     if (!response.ok) {
@@ -251,6 +260,11 @@ function handleRemoveLineClick() {
     removeLastLine();
 }
 
+function handeToggleNumClick(){
+    ShowNums = !ShowNums;
+    renderCollapsibles();
+}
+
 function startUp(){
     overlay = document.getElementById('overlay');
     openBtn = document.getElementById('openBtn');
@@ -260,6 +274,7 @@ function startUp(){
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
     removeLineBtn = document.getElementById("removeLineBtn");
+    ToggleLineNumsBtn = document.getElementById("ToggleLineNums");
 
     openBtn.removeEventListener('click', handleOpenClick);
     openBtn.addEventListener('click', handleOpenClick);
@@ -284,6 +299,9 @@ function startUp(){
 
     removeLineBtn.removeEventListener('click', handleRemoveLineClick);
     removeLineBtn.addEventListener('click', handleRemoveLineClick);
+
+    ToggleLineNumsBtn.removeEventListener('click', handeToggleNumClick);
+    ToggleLineNumsBtn.addEventListener('click', handeToggleNumClick);
 }
 
 async function init() {
@@ -336,8 +354,14 @@ export function createPersonID(){
     return PersonCounter;
 }
 
+function clearCollapsibles(){
+    document.getElementById("TeacherCollapsibles").innerHTML = ''
+    document.getElementById("StudentCollapsibles").innerHTML = ''
+}
+
 function renderCollapsibles(){
     let colls;
+    clearCollapsibles();
     for (let h of Persons){
         if (h.getTag() == "Teacher"){
             colls = document.getElementById("TeacherCollapsibles");
@@ -350,6 +374,8 @@ function renderCollapsibles(){
         const PName = h.getName();
         const QCOunt = collectQuotes(PID).length;
         newColl.id = `Collapsible${PID}`;
+        newColl.className = "CollDiv"
+        newColl.dataset.pid = PID;
         newColl.innerHTML = `
             <button type="button" class="collapsible">
                 <img src="${PPic}" height="50">
@@ -368,27 +394,64 @@ function renderCollapsibles(){
             const newQuote = document.createElement("div");
             const lines = quotes.getLines();
             let tempQuotes = "";
-            if (lines.length > 1){
-                for (let lins of lines){
-                    tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+            if (ShowNums){
+                if (lines.length > 1){
+                    for (let lins of lines){
+                        tempQuotes += `<p>${lins.getID()} ${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+                    }
+                    newQuote.innerHTML = tempQuotes;
+                } else{
+                    newQuote.innerHTML = `
+                        <p>${lines[0].getID()} ${lines[0].assemble()}</p>
+                    `;
+                }                
+                
+                if (quotesDone != collectQuotes(PID).length){
+                    newQuote.innerHTML += `<hr>`
                 }
-                newQuote.innerHTML = tempQuotes;
-            } else if (quotesDone == collectQuotes(PID).length){
-                newQuote.innerHTML = `
-                    <p>${lines[0].assemble()}</p>
-                `;
             } else {
-                newQuote.innerHTML = `
-                    <p>${lines[0].assemble()}</p> <hr>
-                `;
+                if (lines.length > 1){
+                    for (let lins of lines){
+                        tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+                    }
+                    newQuote.innerHTML = tempQuotes;
+                } else{
+                    newQuote.innerHTML = `
+                        <p>${lines[0].assemble()}</p>
+                    `;
+                }                
+                
+                if (quotesDone != collectQuotes(PID).length){
+                    newQuote.innerHTML += `<hr>`
+                }
             }
             content.appendChild(newQuote);
         }
+
+        if (activePersonIDs.includes(String(PID))){
+            newColl.querySelector(".collapsible").classList.add("active");
+            content.classList.add("no-transition");
+            content.style.maxHeight = content.scrollHeight + "px";
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    content.classList.remove("no-transition");
+                });
+            });
+        }
     }
+
     var coll = document.getElementsByClassName("collapsible");
 
-    for (let i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
+    for (let i of coll) {
+        i.addEventListener("click", function() {
+            if (!this.classList.contains("active")){
+                activePersonIDs.push(this.closest(".CollDiv").dataset.pid);
+            } else {
+                const index = activePersonIDs.indexOf(this.closest(".CollDiv").dataset.pid)
+                if (index > -1){
+                    activePersonIDs.splice(index, 1)
+                }
+            }
             this.classList.toggle("active");
             var content = this.nextElementSibling;
             if (content.style.maxHeight){

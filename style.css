@@ -77,6 +77,20 @@ body {
 }
 .btn-seamless:hover { background: #eef6f5; }
 
+.category {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.category-label {
+    width: 70%;
+    text-align: left;
+    margin: 0 0 4px 0;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
 .collapsible {
     background-color: #eee;
     color: #444;
@@ -104,6 +118,12 @@ body {
     color: black;
     margin-left: 5px;
     flex: 0.025;
+}
+
+.CollDiv {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .content{
@@ -197,6 +217,10 @@ body {
     flex: auto;
     text-align: left;
     margin-left: 10px;
+}
+
+.no-transition {
+    transition: none !important;
 }
 
 .overlay {
@@ -408,11 +432,7 @@ body {
     background: var(--teal-dark); 
 }
 
+#TeacherCollapsibles,
 #StudentCollapsibles {
-    align-items: center;
-    align-self: center;
-}
-#TeacherCollapsibles {
-    align-items: center;
-    align-self: center;
+    width: 100%;
 }

@@ -6,15 +6,20 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <p><ul><b>Lehrende</b></ul></p>
-        <div id="TeacherCollapsibles"></div>
+        <div class="category">
+            <p class="category-label">Lehrende</p>
+            <div id="TeacherCollapsibles"></div>
+        </div>
 
-        <p><ul><b>Schüler*innen</b></ul></p>
-        <div id="StudentCollapsibles"></div>
+        <div class="category">
+            <p class="category-label">Schüler*innen</p>
+            <div id="StudentCollapsibles"></div>
+        </div>
         
         <div id="bottom">
             <button id="openBtn">Neues Zitat</button>
             <button id="saveAllBtn">Speichern</button>
+            <button id="ToggleLineNums">ToggleLineNums</button>
         </div>
 
         <div class="overlay" id="overlay">
