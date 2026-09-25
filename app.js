@@ -462,6 +462,8 @@ function replaceDuplicateIDs(){
             }
         }
     }
+
+    saveAll();
 }
 
 function createLineID(){
