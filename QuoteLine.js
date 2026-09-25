@@ -30,6 +30,14 @@ export class QuoteLine {
         }
     }
 
+    changeID(newID){
+        this.id = newID;
+    }
+
+    changePID(newPID){
+        this.personId = newPID;
+    }
+
     assemble(){
         let QuoteString = "";
         if (this.notes != null){

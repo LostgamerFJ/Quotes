@@ -114,6 +114,12 @@ export function openPersonPopup() {
             }
         }
 
+        for (let p of Persons){
+            if (p.getName() == person.getName()){
+                openErrorPopup("Diese Person existiert bereits.");
+            }
+        }
+
         Persons.push(person);
         savePersons();
         closePopup();

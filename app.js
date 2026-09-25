@@ -9,6 +9,10 @@ export let Persons = [];
 export let QuoteLines = [];
 let Quotes = [];
 
+let missedPersonIDs = [];
+let missedLineIDs = [];
+let missedQuoteIDs = [];
+
 let activePersonIDs = [];
 
 export let PersonCounter = null;
@@ -302,6 +306,8 @@ function startUp(){
 
     ToggleLineNumsBtn.removeEventListener('click', handeToggleNumClick);
     ToggleLineNumsBtn.addEventListener('click', handeToggleNumClick);
+
+    replaceDuplicateIDs();
 }
 
 async function init() {
@@ -339,19 +345,153 @@ export function showImg(){
     }
 }
 
+function findMissedIDs(){
+    missedPersonIDs = [];
+    missedLineIDs = [];
+    missedQuoteIDs = [];
+
+    const p = Persons.length + 1;
+    const l = QuoteLines.length + 1;
+    const q = Quotes.length + 1;
+
+    for (let i = 1; i <= p; i++) {
+        let found = false;
+        for (let j = 0; j < p - 1; j++) {
+            if (Persons[j].getID() == i) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            missedPersonIDs.push(i);
+    }
+
+    for (let i = 1; i <= l; i++) {
+        let found = false;
+        for (let j = 0; j < l - 1; j++) {
+            if (QuoteLines[j].getID() == i) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            missedLineIDs.push(i);
+    }
+
+    for (let i = 1; i <= q; i++) {
+        let found = false;
+        for (let j = 0; j < q - 1; j++) {
+            if (Quotes[j].getID() == i) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            missedQuoteIDs.push(i);
+    }
+
+}
+
+function replaceDuplicateIDs(){
+    let pm = [];
+    let lm = [];
+    let qm = [];
+
+    const p = Persons.length + 1;
+    const l = QuoteLines.length + 1;
+    const q = Quotes.length + 1;
+
+    for (let i = 1; i <= p; i++) {
+        for (let j = 0; j < p - 1; j++) {
+            if (Persons[j].getID() == i) {
+                pm.push(i);
+            }
+        }
+
+        if (pm.length > 1){
+            for (let pr of Persons){
+                if (pr.getID() == pm[pm.length - 1]){
+                    pr.changeID(createPersonID());
+                    for (let lns of QuoteLines){
+                        if (lns.getPID() == pm[pm.length - 1]){
+                            lns.changePID(pr.getID());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (let i = 1; i <= l; i++) {
+        for (let j = 0; j < l - 1; j++) {
+            if (QuoteLines[j].getID() == i) {
+                lm.push(i);
+            }
+        }
+
+        if (lm.length > 1){
+            for (let ln of QuoteLines){
+                if (ln.getID() == lm[lm.length - 1]){
+                    ln.changeID(createLineID());
+                    for (let qts of Quotes){
+                        if (qts.getLineIDs().includes(lm[lm.length - 1])){
+                            const newLineIDs = qts.getLineIDs().map(id => id === lm[lm.length - 1] ? ln.getID() : id);
+                            qts.changeLineIDs(newLineIDs);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (let i = 1; i <= q; i++) {
+        for (let j = 0; j < q - 1; j++) {
+            if (Quotes[j].getID() == i) {
+                qm.push(i);
+            }
+        }
+
+        if (qm.length > 1){
+            for (let qt of Quotes){
+                if (qt.getID() == qm[qm.length - 1]){
+                    qt.changeID(createQuoteID());
+                }
+            }
+        }
+    }
+}
+
 function createLineID(){
-    LineCounter ++;
-    return LineCounter;
+    findMissedIDs();
+    if (missedLineIDs.length > 0){
+        return missedLineIDs.shift();
+    } else {
+        LineCounter ++;
+        return LineCounter;
+    }
 }
 
 function createQuoteID(){
-    QuoteCounter ++;
-    return QuoteCounter;
+    findMissedIDs();
+    if (missedQuoteIDs.length > 0){
+        return missedQuoteIDs.shift();
+    } else {
+        QuoteCounter ++;
+        return QuoteCounter;
+    }
 }
 
 export function createPersonID(){
-    PersonCounter ++;
-    return PersonCounter;
+    findMissedIDs();
+    if (missedPersonIDs.length > 0){
+        return missedPersonIDs.shift();
+    } else {
+        PersonCounter ++;
+        return PersonCounter;
+    }
 }
 
 function clearCollapsibles(){

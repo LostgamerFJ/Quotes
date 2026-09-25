@@ -33,6 +33,10 @@ export class Person {
         return this.tag;
     }
 
+    changeID(newID){
+        this.id = newID;
+    }
+
     static fromJSON(obj){
         return new Person(obj.id, obj.lastName, obj.tag, obj.picUrl, obj.salutation, obj.firstName);
     }

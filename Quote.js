@@ -23,6 +23,14 @@ export class Quote {
         return Lines;
     }
 
+    changeID(newID){
+        this.id = newID;
+    }
+
+    changeLineIDs(newLineIDs){
+        this.lineIds = newLineIDs;
+    }
+
     static fromJSON(obj){
         return new Quote(obj.id, obj.lineIds)
     }
