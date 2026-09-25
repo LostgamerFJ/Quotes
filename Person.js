@@ -29,6 +29,10 @@ export class Person {
         return this.firstName ? this.firstName + ' ' + this.lastName : this.salutation + ' ' + this.lastName
     }
 
+    getLastName(){
+        return this.lastName;
+    }
+
     getTag(){
         return this.tag;
     }

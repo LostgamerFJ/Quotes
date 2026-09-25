@@ -9,6 +9,9 @@ export let Persons = [];
 export let QuoteLines = [];
 let Quotes = [];
 
+let Teachers = [];
+let Students = [];
+
 let missedPersonIDs = [];
 let missedLineIDs = [];
 let missedQuoteIDs = [];
@@ -506,6 +509,11 @@ function clearCollapsibles(){
 }
 
 function renderCollapsibles(){
+    Teachers = Persons.filter(p => p.getTag() === "Teacher");
+    Students = Persons.filter(p => p.getTag() === "Student");
+
+    Teachers = Teachers.sort((a, b) => a.getName().localeCompare(b.getLastName()));
+    Students = Students.sort((a, b) => a.getName().localeCompare(b.getLastName()));
     let colls;
     clearCollapsibles();
     for (let h of Persons){
