@@ -519,14 +519,25 @@ function renderCollapsibles(){
         newColl.id = `Collapsible${PID}`;
         newColl.className = "CollDiv"
         newColl.dataset.pid = PID;
-        newColl.innerHTML = `
-            <button type="button" class="collapsible">
-                <img src="${PPic}" height="50">
-                <p class="name">ID: ${PID} ${PName}</p>
-                <p class="quoteCount">${QCOunt}</p>
-            </button>
-            <div class="content" id="quotes${PID}"></div>
-        `;
+        if (Debug){
+            newColl.innerHTML = `
+                <button type="button" class="collapsible">
+                    <img src="${PPic}" height="50">
+                    <p class="name">ID: ${PID} ${PName}</p>
+                    <p class="quoteCount">${QCOunt}</p>
+                </button>
+                <div class="content" id="quotes${PID}"></div>
+            `;
+        } else {
+            newColl.innerHTML = `
+                <button type="button" class="collapsible">
+                    <img src="${PPic}" height="50">
+                    <p class="name">${PName}</p>
+                    <p class="quoteCount">${QCOunt}</p>
+                </button>
+                <div class="content" id="quotes${PID}"></div>
+            `;
+        }
 
         colls.append(newColl);
         
