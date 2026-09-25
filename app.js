@@ -95,14 +95,17 @@ async function getAll() {
 }
 
 export async function savePersons() {
+    Persons.sort((a, b) => a.getID() - b.getID());
     await saveRoute("Persons", Persons);
 }
 
 async function saveLines() {
+    QuoteLines.sort((a, b) => a.getID() - b.getID());
     await saveRoute("QuoteLines", QuoteLines);
 }
 
 async function saveQuotes() {
+    Quotes.sort((a, b) => a.getID() - b.getID());
     await saveRoute("Quotes", Quotes);
 }
 
