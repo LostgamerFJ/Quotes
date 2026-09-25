@@ -23,6 +23,10 @@ export class Quote {
         return Lines;
     }
 
+    getID(){
+        return this.id;
+    }
+
     changeID(newID){
         this.id = newID;
     }
