@@ -21,7 +21,7 @@ let QuoteCounter = null;
 
 let lineCount = 0;
 
-let ShowNums = false;
+let Debug = false;
 
 const personDropdowns = new Map();
 
@@ -33,7 +33,7 @@ let saveAllBtn = null;
 let extraFieldBtn = null;
 let resetBtn = null;
 let removeLineBtn = null;
-let ToggleLineNumsBtn = null;
+let ToggleDebugBtn = null;
 
 await init();
 
@@ -264,8 +264,9 @@ function handleRemoveLineClick() {
     removeLastLine();
 }
 
-function handeToggleNumClick(){
-    ShowNums = !ShowNums;
+function handeToggleDebugClick(){
+    Debug = !Debug;
+
     renderCollapsibles();
 }
 
@@ -278,7 +279,7 @@ function startUp(){
     extraFieldBtn = document.getElementById('extraFieldBtn');
     resetBtn = document.getElementById("resetBtn");
     removeLineBtn = document.getElementById("removeLineBtn");
-    ToggleLineNumsBtn = document.getElementById("ToggleLineNums");
+    ToggleDebugBtn = document.getElementById("ToggleDebug");
 
     openBtn.removeEventListener('click', handleOpenClick);
     openBtn.addEventListener('click', handleOpenClick);
@@ -304,8 +305,8 @@ function startUp(){
     removeLineBtn.removeEventListener('click', handleRemoveLineClick);
     removeLineBtn.addEventListener('click', handleRemoveLineClick);
 
-    ToggleLineNumsBtn.removeEventListener('click', handeToggleNumClick);
-    ToggleLineNumsBtn.addEventListener('click', handeToggleNumClick);
+    ToggleDebugBtn.removeEventListener('click', handeToggleDebugClick);
+    ToggleDebugBtn.addEventListener('click', handeToggleDebugClick);
 
     replaceDuplicateIDs();
 }
@@ -521,7 +522,7 @@ function renderCollapsibles(){
         newColl.innerHTML = `
             <button type="button" class="collapsible">
                 <img src="${PPic}" height="50">
-                <p class="name">${PName}</p>
+                <p class="name">ID: ${PID} ${PName}</p>
                 <p class="quoteCount">${QCOunt}</p>
             </button>
             <div class="content" id="quotes${PID}"></div>
@@ -536,15 +537,17 @@ function renderCollapsibles(){
             const newQuote = document.createElement("div");
             const lines = quotes.getLines();
             let tempQuotes = "";
-            if (ShowNums){
+            if (Debug){
                 if (lines.length > 1){
+                    tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
                     for (let lins of lines){
-                        tempQuotes += `<p>${lins.getID()} ${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+                        tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
                     }
                     newQuote.innerHTML = tempQuotes;
                 } else{
                     newQuote.innerHTML = `
-                        <p>${lines[0].getID()} ${lines[0].assemble()}</p>
+                        <p>QuoteID: ${quotes.getID()}</p>
+                        <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
                     `;
                 }                
                 
