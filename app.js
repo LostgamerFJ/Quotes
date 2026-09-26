@@ -517,7 +517,7 @@ function renderCollapsibles(){
     Students = Students.sort((a, b) => a.getName().localeCompare(b.getLastName()));
 
     Persons = []
-    Persons.concat(Teachers, Students);
+    Persons = Persons.concat(Teachers, Students);
     
     let colls;
     clearCollapsibles();
