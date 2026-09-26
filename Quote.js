@@ -13,8 +13,8 @@ export class Quote {
 
     getLines(){
         let Lines = []
-        for (let lines of QuoteLines){
-            for (let LineIds of this.lineIds){
+        for (let LineIds of this.lineIds){
+            for (let lines of QuoteLines){
                 if (LineIds === lines.getID()){
                     Lines.push(lines);
                 }

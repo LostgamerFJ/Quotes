@@ -91,11 +91,11 @@ async function getAll() {
     ]);
 
     Persons = (personsRaw || []).map(p => Person.fromJSON(p));
-    PersonCounter = Persons.length;
+    PersonCounter = Persons.reduce((max, p) => Math.max(max, p.getID()), 0);
     QuoteLines = (quoteLinesRaw || []).map(z => QuoteLine.fromJSON(z));
-    LineCounter = QuoteLines.length;
+    LineCounter = QuoteLines.reduce((max, l) => Math.max(max, l.getID()), 0);
     Quotes = (quotesRaw || []).map(q => Quote.fromJSON(q));
-    QuoteCounter = Quotes.length;
+    QuoteCounter = Quotes.reduce((max, q) => Math.max(max, q.getID()), 0);
 }
 
 export async function savePersons() {
@@ -403,77 +403,6 @@ function findMissedIDs(){
 
 }
 
-function replaceDuplicateIDs(){
-    let pm = [];
-    let lm = [];
-    let qm = [];
-
-    const p = Persons.length + 1;
-    const l = QuoteLines.length + 1;
-    const q = Quotes.length + 1;
-
-    for (let i = 1; i <= p; i++) {
-        for (let j = 0; j < p - 1; j++) {
-            if (Persons[j].getID() == i) {
-                pm.push(i);
-            }
-        }
-
-        if (pm.length > 1){
-            for (let pr of Persons){
-                if (pr.getID() == pm[pm.length - 1]){
-                    pr.changeID(createPersonID());
-                    for (let lns of QuoteLines){
-                        if (lns.getPID() == pm[pm.length - 1]){
-                            lns.changePID(pr.getID());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for (let i = 1; i <= l; i++) {
-        for (let j = 0; j < l - 1; j++) {
-            if (QuoteLines[j].getID() == i) {
-                lm.push(i);
-            }
-        }
-
-        if (lm.length > 1){
-            for (let ln of QuoteLines){
-                if (ln.getID() == lm[lm.length - 1]){
-                    ln.changeID(createLineID());
-                    for (let qts of Quotes){
-                        if (qts.getLineIDs().includes(lm[lm.length - 1])){
-                            const newLineIDs = qts.getLineIDs().map(id => id === lm[lm.length - 1] ? ln.getID() : id);
-                            qts.changeLineIDs(newLineIDs);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for (let i = 1; i <= q; i++) {
-        for (let j = 0; j < q - 1; j++) {
-            if (Quotes[j].getID() == i) {
-                qm.push(i);
-            }
-        }
-
-        if (qm.length > 1){
-            for (let qt of Quotes){
-                if (qt.getID() == qm[qm.length - 1]){
-                    qt.changeID(createQuoteID());
-                }
-            }
-        }
-    }
-
-    saveAll();
-}
-
 function createLineID(){
     findMissedIDs();
     if (missedLineIDs.length > 0){
@@ -513,8 +442,8 @@ function renderCollapsibles(){
     Teachers = Persons.filter(p => p.getTag() === "Teacher");
     Students = Persons.filter(p => p.getTag() === "Student");
 
-    Teachers = Teachers.sort((a, b) => a.getName().localeCompare(b.getLastName()));
-    Students = Students.sort((a, b) => a.getName().localeCompare(b.getLastName()));
+    Teachers = Teachers.sort((a, b) => a.getLastName().localeCompare(b.getLastName()));
+    Students = Students.sort((a, b) => a.getLastName().localeCompare(b.getLastName()));
 
     Persons = []
     Persons = Persons.concat(Teachers, Students);
