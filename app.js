@@ -11,7 +11,6 @@ let Quotes = [];
 
 let Teachers = [];
 let Students = [];
-let PersonsTemp = [];
 
 let missedPersonIDs = [];
 let missedLineIDs = [];
@@ -447,6 +446,7 @@ function renderCollapsibles(){
 
     Persons = []
     Persons = Persons.concat(Teachers, Students);
+    Persons.push(Persons[0]);
     
     let colls;
     clearCollapsibles();
@@ -456,6 +456,7 @@ function renderCollapsibles(){
         } else if (h.getTag() == "Student"){
             colls = document.getElementById("StudentCollapsibles");
         }
+
         const newColl = document.createElement("div");
         const PID = h.getID();
         const PPic = h.getSrc();
@@ -540,6 +541,7 @@ function renderCollapsibles(){
             });
         }
     }
+
 
     var coll = document.getElementsByClassName("collapsible");
 
