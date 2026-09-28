@@ -444,6 +444,7 @@ export function createPersonID(){
 function clearCollapsibles(){
     document.getElementById("TeacherCollapsibles").innerHTML = ''
     document.getElementById("StudentCollapsibles").innerHTML = ''
+    document.getElementById("Unassigned").remove();
 }
 
 function renderCollapsibles(){
@@ -455,7 +456,7 @@ function renderCollapsibles(){
 
     Persons = []
     Persons = Persons.concat(Teachers, Students);
-    Persons.push(Persons[0]);
+    Persons.push(new Person(0, "Unassigned", null, "Default", null, null));
     
     let colls;
     clearCollapsibles();
@@ -522,7 +523,9 @@ function renderCollapsibles(){
                     newQuote.innerHTML += `<hr>`
                 }
 
-                QuotesDone.push(quotes);
+                if (!QuotesDone.includes(quotes)){
+                    QuotesDone.push(quotes);
+                }
 
             } else {
                 if (lines.length > 1){
@@ -536,8 +539,10 @@ function renderCollapsibles(){
                     `;
                 }
 
-                QuotesDone.push(quotes);
-                
+                if (!QuotesDone.includes(quotes)){
+                    QuotesDone.push(quotes);
+                }
+
                 if (quotesDone != collectQuotes(PID).length){
                     newQuote.innerHTML += `<hr>`
                 }
@@ -574,21 +579,20 @@ function renderCollapsibles(){
                 let tempQuotes = "";
                 if (Debug){
                     if (lines.length > 1){
-                        tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
+                        tempQuotes += `<p>QuoteID: ${missed.getID()}</p>`
                         for (let lins of lines){
                             tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
                         }
                         newQuote.innerHTML = tempQuotes;
                     } else{
                         newQuote.innerHTML = `
-                            <p>QuoteID: ${quotes.getID()}</p>
+                            <p>QuoteID: ${missed.getID()}</p>
                             <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
                         `;
                     }                
                     
-                    if (quotesDone != collectQuotes(PID).length){
-                        newQuote.innerHTML += `<hr>`
-                    }
+                    newQuote.innerHTML += `<hr>`
+                    
 
                 } else {
                     if (lines.length > 1){
