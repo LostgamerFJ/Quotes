@@ -474,6 +474,8 @@ function renderCollapsibles(){
             colls = document.getElementById("TeacherCollapsibles");
         } else if (h.getTag() == "Student"){
             colls = document.getElementById("StudentCollapsibles");
+        } else {
+            continue;
         }
 
         const newColl = document.createElement("div");
@@ -595,7 +597,7 @@ function renderCollapsibles(){
                     } else{
                         newQuote.innerHTML = `
                             <p>QuoteID: ${missed.getID()}</p>
-                            <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
+                            <p>LineID: ${lines[0].getID()} Person: Unassigned Text: ${lines[0].assemble()}</p>
                         `;
                     }                
                     
@@ -605,7 +607,7 @@ function renderCollapsibles(){
                 } else {
                     if (lines.length > 1){
                         for (let lins of lines){
-                            tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+                            tempQuotes += `<p>Unassigned${lins.assembleMultiple()}</p>`
                         }
                         newQuote.innerHTML = tempQuotes;
                     } else{
