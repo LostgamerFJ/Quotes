@@ -17,6 +17,7 @@ let missedLineIDs = [];
 let missedQuoteIDs = [];
 
 let activePersonIDs = [];
+let QuotesDone = [];
 
 export let PersonCounter = null;
 let LineCounter = null;
@@ -313,6 +314,8 @@ function startUp(){
 
     ToggleDebugBtn.removeEventListener('click', handeToggleDebugClick);
     ToggleDebugBtn.addEventListener('click', handeToggleDebugClick);
+
+    replaceDuplicateIDs();
 }
 
 async function init() {
@@ -448,6 +451,7 @@ function renderCollapsibles(){
     
     let colls;
     clearCollapsibles();
+    QuotesDone = [];
     for (let h of Persons){
         if (h.getTag() == "Teacher"){
             colls = document.getElementById("TeacherCollapsibles");
@@ -509,6 +513,9 @@ function renderCollapsibles(){
                 if (quotesDone != collectQuotes(PID).length){
                     newQuote.innerHTML += `<hr>`
                 }
+
+                QuotesDone.push(quotes);
+
             } else {
                 if (lines.length > 1){
                     for (let lins of lines){
@@ -519,7 +526,9 @@ function renderCollapsibles(){
                     newQuote.innerHTML = `
                         <p>${lines[0].assemble()}</p>
                     `;
-                }                
+                }
+
+                QuotesDone.push(quotes);
                 
                 if (quotesDone != collectQuotes(PID).length){
                     newQuote.innerHTML += `<hr>`
@@ -537,6 +546,60 @@ function renderCollapsibles(){
                     content.classList.remove("no-transition");
                 });
             });
+        }
+    }
+
+    if (QuotesDone.length != Quotes.length){
+        let quotesDone = 0;
+        const Unassigned = document.getElementById("Unassigned");
+        document.getElementById("categoryThingy").innerHTML += `
+            <div class="category" id="Unassigned">
+                <p class="category-label">Nicht zugeordnet:</p>
+            </div>
+        `;
+        
+        for (let missed of Quotes){
+            if (!QuotesDone.contains(missed)){
+                quotesDone ++;
+                const newQuote = document.createElement("p");
+                const lines = missed.getLines();
+                let tempQuotes = "";
+                if (Debug){
+                    if (lines.length > 1){
+                        tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
+                        for (let lins of lines){
+                            tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                        }
+                        newQuote.innerHTML = tempQuotes;
+                    } else{
+                        newQuote.innerHTML = `
+                            <p>QuoteID: ${quotes.getID()}</p>
+                            <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
+                        `;
+                    }                
+                    
+                    if (quotesDone != collectQuotes(PID).length){
+                        newQuote.innerHTML += `<hr>`
+                    }
+
+                } else {
+                    if (lines.length > 1){
+                        for (let lins of lines){
+                            tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+                        }
+                        newQuote.innerHTML = tempQuotes;
+                    } else{
+                        newQuote.innerHTML = `
+                            <p>${lines[0].assemble()}</p>
+                        `;
+                    }
+                    
+                    if (quotesDone != collectQuotes(PID).length){
+                        newQuote.innerHTML += `<hr>`
+                    }
+                }
+                Unassigned.appendChild(newQuote);
+            }
         }
     }
 
