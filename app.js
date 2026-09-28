@@ -548,7 +548,6 @@ function renderCollapsibles(){
     }
 
     if (QuotesDone.length != Quotes.length){
-        let quotesDone = 0;
         const Unassigned = document.getElementById("Unassigned");
         document.getElementById("categoryThingy").innerHTML += `
             <div class="category" id="Unassigned">
@@ -557,6 +556,7 @@ function renderCollapsibles(){
         `;
         
         for (let missed of Quotes){
+            let quotesDone = 0;
             if (!QuotesDone.includes(missed)){
                 quotesDone ++;
                 const newQuote = document.createElement("p");
@@ -606,7 +606,7 @@ function renderCollapsibles(){
 
     for (let i of coll) {
         i.addEventListener("click", function() {
-            if (!this.classList.includes("active")){
+            if (!this.classList.contains("active")){
                 activePersonIDs.push(this.closest(".CollDiv").dataset.pid);
             } else {
                 const index = activePersonIDs.indexOf(this.closest(".CollDiv").dataset.pid)
