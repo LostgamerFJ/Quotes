@@ -314,8 +314,6 @@ function startUp(){
 
     ToggleDebugBtn.removeEventListener('click', handeToggleDebugClick);
     ToggleDebugBtn.addEventListener('click', handeToggleDebugClick);
-
-    replaceDuplicateIDs();
 }
 
 async function init() {
