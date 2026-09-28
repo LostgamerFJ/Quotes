@@ -442,7 +442,7 @@ export function createPersonID(){
 }
 
 function clearCollapsibles(){
-    document.getElementById("categoryThingy").innerHTML = ``
+    document.getElementById("categoryThingy").innerHTML = `
         <div class="category">
             <p class="category-label">Lehrende</p>
             <div id="TeacherCollapsibles"></div>
