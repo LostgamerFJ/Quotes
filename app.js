@@ -442,9 +442,17 @@ export function createPersonID(){
 }
 
 function clearCollapsibles(){
-    document.getElementById("TeacherCollapsibles").innerHTML = ''
-    document.getElementById("StudentCollapsibles").innerHTML = ''
-    document.getElementById("Unassigned").remove();
+    document.getElementById("categoryThingy").innerHTML = ``
+        <div class="category">
+            <p class="category-label">Lehrende</p>
+            <div id="TeacherCollapsibles"></div>
+        </div>
+
+        <div class="category">
+            <p class="category-label">Schüler*innen</p>
+            <div id="StudentCollapsibles"></div>
+        </div>
+    `;
 }
 
 function renderCollapsibles(){
