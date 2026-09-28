@@ -557,7 +557,7 @@ function renderCollapsibles(){
         `;
         
         for (let missed of Quotes){
-            if (!QuotesDone.contains(missed)){
+            if (!QuotesDone.includes(missed)){
                 quotesDone ++;
                 const newQuote = document.createElement("p");
                 const lines = missed.getLines();
@@ -606,7 +606,7 @@ function renderCollapsibles(){
 
     for (let i of coll) {
         i.addEventListener("click", function() {
-            if (!this.classList.contains("active")){
+            if (!this.classList.includes("active")){
                 activePersonIDs.push(this.closest(".CollDiv").dataset.pid);
             } else {
                 const index = activePersonIDs.indexOf(this.closest(".CollDiv").dataset.pid)
