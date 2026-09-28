@@ -174,7 +174,17 @@ function resetPopup(){
 }
 
 function fullReset(){
-    document.getElementById("Collapsibles").innerHTML = ``;
+    document.getElementById("categoryThingy").innerHTML = `
+        <div class="category">
+            <p class="category-label">Lehrende</p>
+            <div id="TeacherCollapsibles"></div>
+        </div>
+
+        <div class="category">
+            <p class="category-label">Schüler*innen</p>
+            <div id="StudentCollapsibles"></div>
+        </div>
+    `;
     resetPopup();
     startUp();
     renderCollapsibles();
