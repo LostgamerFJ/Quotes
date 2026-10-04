@@ -38,8 +38,8 @@ let extraFieldBtn = null;
 let resetBtn = null;
 let removeLineBtn = null;
 let ToggleDebugBtn = null;
+let DemoBtn = null;
 
-await init();
 
 async function loadRoute(route) {
     const response = await fetch(`${WORKER_URL}/${route}`);
@@ -287,6 +287,38 @@ function handeToggleDebugClick(){
     renderCollapsibles();
 }
 
+function handleDemoClick() {
+    Persons.push(new Person(createPersonID(), "Klumpner", "Teacher", "Default", "Herr"));
+    Persons.push(new Person(createPersonID(), "Dollinger", "Teacher", "Default", "Herr"));
+    Persons.push(new Person(createPersonID(), "Paula", "Student", "Default", null, "Jakob"));
+    Persons.push(new Person(createPersonID(), "Fürst", "Student", "Default", null , "Felix"));
+    console.log(Persons);
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[0].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Ihr passt doch sowieso nicht auf!"`));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), `"MAAAAAAAN"`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID(), QuoteLines[4].getID()]));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Ich brauch mehr Spucke im Rachen"`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[7].getID()]));
+
+    console.log(QuoteLines);
+    console.log(Quotes);
+
+    renderCollapsibles();
+}
+
 function startUp(){
     overlay = document.getElementById('overlay');
     openBtn = document.getElementById('openBtn');
@@ -297,6 +329,7 @@ function startUp(){
     resetBtn = document.getElementById("resetBtn");
     removeLineBtn = document.getElementById("removeLineBtn");
     ToggleDebugBtn = document.getElementById("ToggleDebug");
+    DemoBtn = document.getElementById("DemoBtn");
 
     openBtn.removeEventListener('click', handleOpenClick);
     openBtn.addEventListener('click', handleOpenClick);
@@ -324,6 +357,9 @@ function startUp(){
 
     ToggleDebugBtn.removeEventListener('click', handeToggleDebugClick);
     ToggleDebugBtn.addEventListener('click', handeToggleDebugClick);
+
+    DemoBtn.removeEventListener('click', handleDemoClick);
+    DemoBtn.addEventListener('click', handleDemoClick);
 }
 
 async function init() {
@@ -464,7 +500,6 @@ function renderCollapsibles(){
 
     Persons = []
     Persons = Persons.concat(Teachers, Students);
-    Persons.push(new Person(0, "Unassigned", null, "Default", null, null));
     
     let colls;
     clearCollapsibles();
@@ -661,6 +696,8 @@ function collectQuotes(personID){
     }
     return TempQuotes;
 }
+
+await init();
 
 addLine();
 startUp();

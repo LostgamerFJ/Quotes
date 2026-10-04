@@ -7,7 +7,7 @@ body {
 }
 
 /* ===== Classes ===== */
-.active, .collapsible:hover {
+.collapsible:hover {
   background-color: #ccc;
 }
 
@@ -213,6 +213,26 @@ body {
     margin-bottom: 28px;
 }
 
+.login {
+    display: none;
+}
+
+.login.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 50px;
+}
+
+.loggedIn {
+    display: none;
+}
+
+.loggedIn.active {
+    display: flex;
+}
+
 .name {
     flex: auto;
     text-align: left;
@@ -221,6 +241,18 @@ body {
 
 .no-transition {
     transition: none !important;
+}
+
+.notLoggedIn {
+    display: none;
+}
+
+.notLoggedIn.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 50px;
 }
 
 .overlay {
