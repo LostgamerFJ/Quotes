@@ -11,7 +11,7 @@ body {
   background-color: #ccc;
 }
 
-.active:after {
+.active.collapsible:after {
   content: '\02C4' !important;
 }
 

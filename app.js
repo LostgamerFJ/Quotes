@@ -39,7 +39,10 @@ let resetBtn = null;
 let removeLineBtn = null;
 let ToggleDebugBtn = null;
 let DemoBtn = null;
+let LoginBtn = null;
+let RegisterBtn = null;
 
+let loginSuccessful = false;
 
 async function loadRoute(route) {
     const response = await fetch(`${WORKER_URL}/${route}`);
@@ -319,6 +322,26 @@ function handleDemoClick() {
     renderCollapsibles();
 }
 
+async function handleLoginClick() {
+    const response = await fetch(`${WORKER_URL}/Login`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: "felix", password: "geheim" }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        document.getElementById("loggedIn").classList.add("active");
+        document.getElementById("login").classList.remove("active");
+        loginSuccessful = true;
+    } else {
+        throw new Error(`Fehler beim Login: ${response.status}`);
+    }
+}
+
 function startUp(){
     overlay = document.getElementById('overlay');
     openBtn = document.getElementById('openBtn');
@@ -330,6 +353,8 @@ function startUp(){
     removeLineBtn = document.getElementById("removeLineBtn");
     ToggleDebugBtn = document.getElementById("ToggleDebug");
     DemoBtn = document.getElementById("DemoBtn");
+    LoginBtn = document.getElementById("loginBtn");
+    RegisterBtn = document.getElementById("registerBtn");
 
     openBtn.removeEventListener('click', handleOpenClick);
     openBtn.addEventListener('click', handleOpenClick);
@@ -360,6 +385,14 @@ function startUp(){
 
     DemoBtn.removeEventListener('click', handleDemoClick);
     DemoBtn.addEventListener('click', handleDemoClick);
+
+    LoginBtn.removeEventListener('click', handleLoginClick);
+    LoginBtn.addEventListener('click', handleLoginClick);
+
+    /*
+    RegisterBtn.removeEventListener('click', handleRegisterClick);
+    RegisterBtn.addEventListener('click', handleRegisterClick);
+    */
 }
 
 async function init() {
@@ -696,9 +729,10 @@ function collectQuotes(personID){
     }
     return TempQuotes;
 }
+if (loginSuccessful){
+    await init();
 
-await init();
-
-addLine();
-startUp();
-renderCollapsibles();
+    addLine();
+    startUp();
+    renderCollapsibles();
+}
