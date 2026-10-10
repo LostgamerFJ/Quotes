@@ -2,6 +2,7 @@ import { Quote } from './Quote.js';
 import { QuoteLine } from './QuoteLine.js';
 import { Person } from './Person.js';
 import { createPersonDropdown, getSelectedPersonId } from './Person_Dropdown.js';
+import { openPersonPopup } from './Person_Popup.js';
 
 const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
 
@@ -30,7 +31,7 @@ let Debug = false;
 const personDropdowns = new Map();
 
 let overlay = null;
-let openBtn = null;
+let newQuoteBtn = null;
 let closeXBtn = null;
 let saveBtn = null;
 let saveAllBtn = null;
@@ -40,8 +41,9 @@ let removeLineBtn = null;
 let ToggleDebugBtn = null;
 let DemoBtn = null;
 let LoginBtn = null;
-let RegisterBtn = null;
+let EditBtn = null;
 
+let loginRequired = true;
 let loginSuccessful = false;
 
 async function loadRoute(route) {
@@ -99,6 +101,15 @@ async function getAll() {
     LineCounter = QuoteLines.reduce((max, l) => Math.max(max, l.getID()), 0);
     Quotes = (quotesRaw || []).map(q => Quote.fromJSON(q));
     QuoteCounter = Quotes.reduce((max, q) => Math.max(max, q.getID()), 0);
+
+    console.log("Daten geladen:", { Persons, QuoteLines, Quotes });
+}
+
+async function getLoginEnabled() {
+    const response = await fetch(`${WORKER_URL}/LoginEnabled`, {
+        method: "GET"
+    });
+    loginRequired = (await response.json()).enabled;
 }
 
 export async function savePersons() {
@@ -291,60 +302,65 @@ function handeToggleDebugClick(){
 }
 
 function handleDemoClick() {
+    Persons = []
+    QuoteLines = []
+    Quotes = []
+
     Persons.push(new Person(createPersonID(), "Klumpner", "Teacher", "Default", "Herr"));
     Persons.push(new Person(createPersonID(), "Dollinger", "Teacher", "Default", "Herr"));
     Persons.push(new Person(createPersonID(), "Paula", "Student", "Default", null, "Jakob"));
     Persons.push(new Person(createPersonID(), "Fürst", "Student", "Default", null , "Felix"));
-    console.log(Persons);
-
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[0].getID()]));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
-
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
-    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Ihr passt doch sowieso nicht auf!"`));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
 
     QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
     QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), `"MAAAAAAAN"`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID(), QuoteLines[4].getID()]));
+    
 
     QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Ich brauch mehr Spucke im Rachen"`));
     QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
-    Quotes.push(new Quote(createQuoteID(), [QuoteLines[7].getID()]));
+    
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
 
-    console.log(QuoteLines);
-    console.log(Quotes);
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Ihr passt doch sowieso nicht auf!"`));
+
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[0].getID(), QuoteLines[7].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[4].getID()]));    
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
 
     renderCollapsibles();
 }
 
 async function handleLoginClick() {
+    const pwd = document.getElementById("password").value;
     const response = await fetch(`${WORKER_URL}/Login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username: "felix", password: "geheim" }),
+        body: JSON.stringify({ password: pwd }),
     });
 
-    const data = await response.json();
 
     if (response.ok) {
-        document.getElementById("loggedIn").classList.add("active");
-        document.getElementById("login").classList.remove("active");
         loginSuccessful = true;
     } else {
         throw new Error(`Fehler beim Login: ${response.status}`);
     }
 }
 
+function switchState(){
+    document.getElementById("loggedIn").classList.toggle("active");
+    document.getElementById("login").classList.toggle("active");
+}
+
 function startUp(){
     overlay = document.getElementById('overlay');
-    openBtn = document.getElementById('openBtn');
+    newQuoteBtn = document.getElementById('newQuoteBtn');
     closeXBtn = document.getElementById('closeXBtn');
     saveBtn = document.getElementById('saveBtn');
     saveAllBtn = document.getElementById('saveAllBtn');
@@ -352,12 +368,11 @@ function startUp(){
     resetBtn = document.getElementById("resetBtn");
     removeLineBtn = document.getElementById("removeLineBtn");
     ToggleDebugBtn = document.getElementById("ToggleDebug");
-    DemoBtn = document.getElementById("DemoBtn");
+    //DemoBtn = document.getElementById("DemoBtn");
     LoginBtn = document.getElementById("loginBtn");
-    RegisterBtn = document.getElementById("registerBtn");
 
-    openBtn.removeEventListener('click', handleOpenClick);
-    openBtn.addEventListener('click', handleOpenClick);
+    newQuoteBtn.removeEventListener('click', handleOpenClick);
+    newQuoteBtn.addEventListener('click', handleOpenClick);
 
     closeXBtn.removeEventListener('click', handleCloseClick);
     closeXBtn.addEventListener('click', handleCloseClick);
@@ -383,16 +398,11 @@ function startUp(){
     ToggleDebugBtn.removeEventListener('click', handeToggleDebugClick);
     ToggleDebugBtn.addEventListener('click', handeToggleDebugClick);
 
-    DemoBtn.removeEventListener('click', handleDemoClick);
-    DemoBtn.addEventListener('click', handleDemoClick);
+    //DemoBtn.removeEventListener('click', handleDemoClick);
+    //DemoBtn.addEventListener('click', handleDemoClick);
 
     LoginBtn.removeEventListener('click', handleLoginClick);
     LoginBtn.addEventListener('click', handleLoginClick);
-
-    /*
-    RegisterBtn.removeEventListener('click', handleRegisterClick);
-    RegisterBtn.addEventListener('click', handleRegisterClick);
-    */
 }
 
 async function init() {
@@ -477,7 +487,9 @@ function findMissedIDs(){
         if (!found)
             missedQuoteIDs.push(i);
     }
-
+    console.log("Missed Person IDs:", missedPersonIDs);
+    console.log("Missed Line IDs:", missedLineIDs);
+    console.log("Missed Quote IDs:", missedQuoteIDs);
 }
 
 function createLineID(){
@@ -511,6 +523,13 @@ export function createPersonID(){
 }
 
 function clearCollapsibles(){
+    for (let colls of document.getElementsByClassName("collapsible")){
+        let nodes = [];
+        colls.childNodes.forEach(node => nodes.push(node));
+        colls.innerHTML = "";
+        colls.outerHTML = colls.outerHTML;
+        nodes.forEach(node => colls.appendChild(node));
+    }
     document.getElementById("categoryThingy").innerHTML = `
         <div class="category">
             <p class="category-label">Lehrende</p>
@@ -524,7 +543,57 @@ function clearCollapsibles(){
     `;
 }
 
-function renderCollapsibles(){
+function handleEditClick(){
+    event.stopPropagation();
+    openPersonPopup("Person bearbeiten", Persons.find(p => p.getID() == EditBtn.id.replace("editBtn", "")));
+}
+
+function handleMouseOver(element) {
+    element.backgroundColor = '#ccc';
+    if (Debug){
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">ID: ${element.dataset.pid} ${element.dataset.name}</p>
+            <img class="btn-seamless" id="editBtn${element.dataset.pid}" src="https://cdn-icons-png.flaticon.com/512/1250/1250925.png" height="10" style="margin-left: 10px" alt="Bearbeiten">
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    } else {
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">${element.dataset.name}</p>
+            <img class="btn-seamless" id="editBtn${element.dataset.pid}" src="https://cdn-icons-png.flaticon.com/512/1250/1250925.png" height="10" style="margin-left: 10px" alt="Bearbeiten">
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    }
+
+    EditBtn = document.getElementById(`editBtn${element.dataset.pid}`);
+    EditBtn.addEventListener("click", handleEditClick);
+}
+
+function handleMouseLeave(element) {
+    element.backgroundColor = '#eee';
+    EditBtn.removeEventListener("click", handleEditClick);
+    EditBtn = null;
+    if (Debug){
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">ID: ${element.dataset.pid} ${element.dataset.name}</p>
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    } else {
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">${element.dataset.name}</p>
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    }
+}
+
+export function renderCollapsibles(){
     Teachers = Persons.filter(p => p.getTag() === "Teacher");
     Students = Persons.filter(p => p.getTag() === "Student");
 
@@ -543,39 +612,51 @@ function renderCollapsibles(){
         } else if (h.getTag() == "Student"){
             colls = document.getElementById("StudentCollapsibles");
         } else {
+            console.log("Person hat kein Tag: ", h);
             continue;
         }
 
-        const newColl = document.createElement("div");
         const PID = h.getID();
         const PPic = h.getSrc();
         const PName = h.getName();
         const QCOunt = collectQuotes(PID).length;
+        if (QCOunt == 0) continue;
+        const newColl = document.createElement("div");
         newColl.id = `Collapsible${PID}`;
         newColl.className = "CollDiv"
-        newColl.dataset.pid = PID;
         if (Debug){
             newColl.innerHTML = `
-                <button type="button" class="collapsible">
+                <div onmouseleave="this.style.backgroundColor='#eee'" class="collapsible" id="collapsible${PID}">
                     <img src="${PPic}" height="50">
                     <p class="name">ID: ${PID} ${PName}</p>
                     <p class="quoteCount">${QCOunt}</p>
-                </button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
+                </div>
                 <div class="content" id="quotes${PID}"></div>
             `;
         } else {
             newColl.innerHTML = `
-                <button type="button" class="collapsible">
+                <div onmouseleave="this.style.backgroundColor='#eee'" class="collapsible" id="collapsible${PID}">
                     <img src="${PPic}" height="50">
                     <p class="name">${PName}</p>
                     <p class="quoteCount">${QCOunt}</p>
-                </button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
+                </div>
                 <div class="content" id="quotes${PID}"></div>
             `;
         }
 
         colls.append(newColl);
-        
+
+        const CollDiv = document.getElementById(`collapsible${PID}`);
+        CollDiv.dataset.PPic = PPic;
+        CollDiv.dataset.pid = PID;
+        CollDiv.dataset.name = PName;
+        CollDiv.dataset.qcount = QCOunt;
+
+        document.getElementById(`collapsible${PID}`).addEventListener("mouseover", () => handleMouseOver(document.getElementById(`collapsible${PID}`)));
+        document.getElementById(`collapsible${PID}`).addEventListener("mouseleave", () => handleMouseLeave(document.getElementById(`collapsible${PID}`)));
+
         const content = document.getElementById(`quotes${PID}`)
         let quotesDone = 0;
         for (let quotes of collectQuotes(PID)){
@@ -698,13 +779,16 @@ function renderCollapsibles(){
 
     for (let i of coll) {
         i.addEventListener("click", function() {
+            const arrow = document.getElementById(`arrow${this.closest(".collapsible").dataset.pid}`);
             if (!this.classList.contains("active")){
-                activePersonIDs.push(this.closest(".CollDiv").dataset.pid);
+                activePersonIDs.push(this.closest(".collapsible").dataset.pid);
+                arrow.style.transform = "rotate(0deg)";
             } else {
-                const index = activePersonIDs.indexOf(this.closest(".CollDiv").dataset.pid)
+                const index = activePersonIDs.indexOf(this.closest(".collapsible").dataset.pid)
                 if (index > -1){
                     activePersonIDs.splice(index, 1)
                 }
+                arrow.style.transform = "rotate(180deg)";
             }
             this.classList.toggle("active");
             var content = this.nextElementSibling;
@@ -729,9 +813,15 @@ function collectQuotes(personID){
     }
     return TempQuotes;
 }
-if (loginSuccessful){
-    await init();
 
+await getLoginEnabled()
+
+console.log("Login required:", loginRequired);
+console.log("Login successful:", loginSuccessful);
+
+if (loginSuccessful || !loginRequired){
+    await init();
+    switchState();
     addLine();
     startUp();
     renderCollapsibles();

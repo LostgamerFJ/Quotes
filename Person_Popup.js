@@ -1,15 +1,21 @@
-import { savePersons, Persons, createPersonID, showImg, uploadAvatar } from "./app.js";
+import { savePersons, Persons, createPersonID, showImg, uploadAvatar, renderCollapsibles } from "./app.js";
 import { Person } from "./Person.js";
 import { openErrorPopup } from "./Error_Popup.js";
 
 let overlay = null;
 
-export function openPersonPopup() {
+export function openPersonPopup(text = "Neue Person", person = null) {
+    const PPic = person ? person.picUrl : "assets/Portrait-Placeholder.png";
+    const PSal = person ? person.salutation : null;
+    const PFN = person && person.firstName ? person.firstName : "";
+    const PLN = person ? person.lastName : "";
+    const PTag = person ? person.tag : "";
+
     overlay = document.createElement('div');
     overlay.className = 'person-popup-overlay';
     overlay.innerHTML = `
         <div class="person-popup">
-            <h2>Neue Person</h2>
+            <h2>${text}</h2>
 
             <div class="field-line field-line-person">
                 <div class="avatar-upload">
@@ -20,24 +26,24 @@ export function openPersonPopup() {
                 <div class="field">
                     <label for="SalutationDropdown">Anrede</label>
                     <select id="SalutationDropdown">
-                        <option value="Herr">Herr</option>
-                        <option value="Frau">Frau</option>
-                        <option value="">Keine Anrede</option>
+                        <option value="Herr" ${PSal === "Herr" ? "selected" : ""}>Herr</option>
+                        <option value="Frau" ${PSal === "Frau" ? "selected" : ""}>Frau</option>
+                        <option value="" ${!PSal ? "selected" : ""}>Keine Anrede</option>
                     </select>
                 </div>
                 <div class="field field-notes">
                     <label for="FirstName">Vorname</label>
-                    <textarea rows="1" id="FirstName"></textarea>
+                    <textarea rows="1" id="FirstName">${PFN}</textarea>
                 </div>
                 <div class="field field-notes">
                     <label for="LastName">Nachname</label>
-                    <textarea rows="1" id="LastName"></textarea>
+                    <textarea rows="1" id="LastName">${PLN}</textarea>
                 </div>
                 <div class="field">
                     <label for="TagDropdown">Typ</label>
                     <select id="TagDropdown">
-                        <option value="Teacher">Lehrer*in</option>
-                        <option value="Student">Schüler*in</option>
+                        <option value="Teacher" ${PTag === "Teacher" ? "selected" : ""}>Lehrer*in</option>
+                        <option value="Student" ${PTag === "Student" ? "selected" : ""}>Schüler*in</option>
                     </select>
                 </div>
             </div>
@@ -76,6 +82,8 @@ export function openPersonPopup() {
         }
     });
 
+    overlay.querySelector('.avatar-upload').style.backgroundImage = `url(${PPic})`;
+
     Avatar.addEventListener('change', () =>{
         showImg();
     })
@@ -88,12 +96,31 @@ export function openPersonPopup() {
         closePopup();
     })
 
-    saveBtn.addEventListener('click', async () => {
+    person ? saveBtn.addEventListener('click', async () => {
+        const editedPerson = Persons.find(p => p.getID() == person.getID());
         if (Salutation.value === "" && FirstName.value === "") {
             openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
             return;
         } else if (Salutation.value !== "" && FirstName.value !== "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
+            return;
+        }
+
+        editedPerson.salutation = Salutation.value || null;
+        editedPerson.firstName = FirstName.value || null;
+        editedPerson.lastName = LastName.value;
+        editedPerson.tag = Tag.value;
+        editedPerson.changePic(PPic);
+        savePersons();
+        closePopup();
+        renderCollapsibles();
+        
+    }) : saveBtn.addEventListener('click', async () => {
+        if (Salutation.value === "" && FirstName.value === "") {
             openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
+            return;
+        } else if (Salutation.value !== "" && FirstName.value !== "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
             return;
         }
 
@@ -122,8 +149,7 @@ export function openPersonPopup() {
 
         Persons.push(person);
         savePersons();
-        closePopup();
-    });
+        closePopup();})
 }
 
 function reset(){

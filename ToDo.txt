@@ -1,6 +1,0 @@
-Something weird in saving with string conversion
-Login save routung
-guest button
-register button
-edit button on colls
-auto setting commit by

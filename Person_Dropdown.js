@@ -159,5 +159,6 @@ export function createPersonDropdown(idSuffix, persons) {
 }
 
 export function getSelectedPersonId(wrapper) {
-    return wrapper.dataset.selectedId || null;
+    const id = wrapper.dataset.selectedId;
+    return id ? Number(id) : null;
 }

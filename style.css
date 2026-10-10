@@ -7,13 +7,6 @@ body {
 }
 
 /* ===== Classes ===== */
-.collapsible:hover {
-  background-color: #ccc;
-}
-
-.active.collapsible:after {
-  content: '\02C4' !important;
-}
 
 .avatar-upload {
   opacity: 0.75;
@@ -110,14 +103,6 @@ body {
     width: 70%;
     align-self: center;
     text-align: center;
-}
-
-.collapsible:after {
-    content: '\02C5';
-    font-size: 13px;
-    color: black;
-    margin-left: 5px;
-    flex: 0.025;
 }
 
 .CollDiv {
@@ -231,6 +216,9 @@ body {
 
 .loggedIn.active {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 .name {
@@ -452,7 +440,7 @@ body {
 }
 
 /* ===== ID selectors ===== */
-#openBtn {
+#newQuoteBtn {
     padding: 12px 22px;
     background: var(--teal);
     border: none;
@@ -460,7 +448,7 @@ body {
     font-size: 15px;
     cursor: pointer;
 }
-#openBtn:hover { 
+#newQuoteBtn:hover { 
     background: var(--teal-dark); 
 }
 
