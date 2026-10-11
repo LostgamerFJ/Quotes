@@ -54,6 +54,9 @@ export class QuoteLine {
     }
 
     assembleMultiple(){
+        if (this.personId == 0){
+            return this.quote;
+        }
         let QuoteString = "";
         if (this.notes != null){
             QuoteString += this.notes + ": ";

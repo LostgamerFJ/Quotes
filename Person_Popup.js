@@ -88,9 +88,11 @@ export function openPersonPopup(text = "Neue Person", person = null) {
         showImg();
     })
 
-    resetBtn.addEventListener('click', () => {
+    person ? resetBtn.addEventListener('click', () => {
+        reset("Person bearbeiten", person);
+    }) : resetBtn.addEventListener('click', () => {
         reset();
-    })
+    });
 
     cancelBtn.addEventListener('click', () => {
         closePopup();
@@ -127,6 +129,13 @@ export function openPersonPopup(text = "Neue Person", person = null) {
         const person = (FirstName.value === "")
             ? new Person(createPersonID(), LastName.value, Tag.value, "Default", Salutation.value, null)
             : new Person(createPersonID(), LastName.value, Tag.value, "Default", null, FirstName.value);
+        
+        for (let p of Persons){
+            if (p.getName() == person.getName()){
+                openErrorPopup("Diese Person existiert bereits.");
+                return;
+            }
+        }
 
         const file = Avatar.files[0];
         if (file) {
@@ -142,18 +151,14 @@ export function openPersonPopup(text = "Neue Person", person = null) {
             }
         }
 
-        for (let p of Persons){
-            if (p.getName() == person.getName()){
-                openErrorPopup("Diese Person existiert bereits.");
-            }
-        }
+        
 
         Persons.push(person);
         savePersons();
         closePopup();})
 }
 
-function reset(){
+function reset(title = "Neue Person", person = null) {
     overlay.remove();
-    openPersonPopup();
+    openPersonPopup(title, person);
 }

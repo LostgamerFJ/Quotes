@@ -12,6 +12,7 @@ let Quotes = [];
 
 let Teachers = [];
 let Students = [];
+let Rest = [];
 
 let missedPersonIDs = [];
 let missedLineIDs = [];
@@ -224,13 +225,21 @@ function collectLines() {
         const contextField = document.getElementById(`Context${suffix}`);
 
         if (!notesField.value && contextField.value) {
-            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, notesField.value, `(${contextField.value})`));
+            const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, notesField.value, `(${contextField.value})`);
+            QuoteLines.push(newLine);
+            lines.push(newLine);
         } else if (!contextField.value && notesField.value){
-            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, contextField.value));
+            const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, contextField.value);
+            QuoteLines.push(newLine);
+            lines.push(newLine);
         } else if (!notesField.value && !contextField.value){
-            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`));
+            const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`);
+            QuoteLines.push(newLine);
+            lines.push(newLine);
         } else {
-            lines.push(new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, `(${contextField.value})`));
+            const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, `(${contextField.value})`);
+            QuoteLines.push(newLine);
+            lines.push(newLine);
         }
 
         
@@ -341,7 +350,6 @@ function handleSaveClick() {
     const lines = collectLines();
     let ids = [];
     for (let i of lines){
-        QuoteLines.push(i);
         ids.push(i.getID());
     }
     saveLines();
@@ -524,9 +532,9 @@ function findMissedIDs(){
     missedLineIDs = [];
     missedQuoteIDs = [];
 
-    const p = Persons.length + 1;
-    const l = QuoteLines.length + 1;
-    const q = Quotes.length + 1;
+    const p = Persons.length;
+    const l = QuoteLines.length;
+    const q = Quotes.length;
 
     for (let i = 1; i <= p; i++) {
         let found = false;
@@ -675,12 +683,13 @@ function handleMouseLeave(element) {
 export function renderCollapsibles(){
     Teachers = Persons.filter(p => p.getTag() === "Teacher");
     Students = Persons.filter(p => p.getTag() === "Student");
+    Rest = Persons.filter(p => p.getTag() !== "Teacher" && p.getTag() !== "Student");
 
     Teachers = Teachers.sort((a, b) => a.getLastName().localeCompare(b.getLastName()));
     Students = Students.sort((a, b) => a.getLastName().localeCompare(b.getLastName()));
 
     Persons = []
-    Persons = Persons.concat(Teachers, Students);
+    Persons = Persons.concat(Teachers, Students, Rest);
     
     let colls;
     clearCollapsibles();
@@ -747,7 +756,11 @@ export function renderCollapsibles(){
                 if (lines.length > 1){
                     tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
                     for (let lins of lines){
-                        tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                        if (lins.getPID() == 0){
+                            tempQuotes += `<p>LineID: ${lins.getID()} Typ: Einschub Text: ${lins.assembleMultiple()}</p>`
+                        } else {
+                            tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                        }
                     }
                     newQuote.innerHTML = tempQuotes;
                 } else{
@@ -801,13 +814,13 @@ export function renderCollapsibles(){
     }
 
     if (QuotesDone.length != Quotes.length){
-        const Unassigned = document.getElementById("Unassigned");
-        document.getElementById("categoryThingy").innerHTML += `
-            <div class="category" id="Unassigned">
+        const Unassigned = document.createElement("div");
+        Unassigned.id = "Unassigned";
+        Unassigned.className = "category"
+        Unassigned.innerHTML += `
                 <p class="category-label">Nicht zugeordnet:</p>
-            </div>
         `;
-        
+        document.getElementById("categoryThingy").appendChild(Unassigned);
         for (let missed of Quotes){
             let quotesDone = 0;
             if (!QuotesDone.includes(missed)){

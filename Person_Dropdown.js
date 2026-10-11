@@ -65,14 +65,19 @@ export function createPersonDropdown(idSuffix, persons) {
             item.setAttribute('role', 'option');
             item.dataset.id = person.id;
 
-            const img = document.createElement('img');
-            img.src = resolveImageUrl(person.picUrl) || '';
-            img.alt = '';
+            if (person.getID() == 0) {
+
+            }else {
+                const img = document.createElement('img');
+                img.src = resolveImageUrl(person.picUrl) || '';
+                img.alt = '';
+                item.appendChild(img);
+            }
 
             const span = document.createElement('span');
             span.textContent = personLabel(person);
 
-            item.appendChild(img);
+            
             item.appendChild(span);
 
             item.addEventListener('click', () => {

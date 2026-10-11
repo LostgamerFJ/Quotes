@@ -26,7 +26,11 @@ export class Person {
     }
 
     getName(){
-        return this.firstName ? this.firstName + ' ' + this.lastName : this.salutation + ' ' + this.lastName
+        if (this.tag === "Einschub"){
+            return "";
+        } else {
+            return this.firstName ? this.firstName + ' ' + this.lastName : this.salutation + ' ' + this.lastName
+        }
     }
 
     getLastName(){
