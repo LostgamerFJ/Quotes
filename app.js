@@ -44,10 +44,67 @@ let LoginBtn = null;
 let EditBtn = null;
 
 let loginRequired = true;
-let loginSuccessful = false;
+const TOKEN_KEY = "quotesToken";
+let Token = localStorage.getItem(TOKEN_KEY);
+let loginSuccessful = Token !== null;
+
+const imageCache = new Map();
+const PLACEHOLDER_URL = "./assets/Portrait_Placeholder.png";
+const WORKER_PICS_PREFIX = `${WORKER_URL}/Pics/`;
+
+function isWorkerImage(picUrl) {
+    return typeof picUrl === "string" && picUrl.startsWith(WORKER_PICS_PREFIX);
+}
+
+async function preloadImage(picUrl) {
+    if (!isWorkerImage(picUrl) || imageCache.has(picUrl)) return;
+
+    const response = await fetch(picUrl, {
+        headers: { "Authorization": `Bearer ${Token}` }
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Fehler beim Laden von ${picUrl}: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    imageCache.set(picUrl, URL.createObjectURL(blob));
+}
+
+export async function preloadAllImages(persons) {
+    const results = await Promise.allSettled(persons.map(p => preloadImage(p.getSrc())));
+    results
+        .filter(r => r.status === "rejected")
+        .forEach(r => console.error(r.reason));
+}
+
+export function resolveImageUrl(picUrl) {
+    if (!isWorkerImage(picUrl)) return picUrl;
+    return imageCache.get(picUrl) ?? PLACEHOLDER_URL;
+}
+
+export function cacheUploadedImage(picUrl, file) {
+    const old = imageCache.get(picUrl);
+    if (old) URL.revokeObjectURL(old);
+    imageCache.set(picUrl, URL.createObjectURL(file));
+}
 
 async function loadRoute(route) {
-    const response = await fetch(`${WORKER_URL}/${route}`);
+    const response = await fetch(`${WORKER_URL}/${route}`,{
+        headers: {
+            "Authorization": `Bearer ${Token}`
+        }
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
 
     if (!response.ok) {
         throw new Error(`Fehler beim Laden von ${route}: ${response.status}`);
@@ -65,9 +122,17 @@ function formatArray(array) {
 async function saveRoute(route, array) {
     const response = await fetch(`${WORKER_URL}/${route}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Token}`
+         },
         body: formatArray(array),
     });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
 
     if (!response.ok) {
         throw new Error(`Fehler beim Speichern von ${route}: ${response.status}`);
@@ -77,9 +142,17 @@ async function saveRoute(route, array) {
 export async function uploadAvatar(file, filename) {
     const response = await fetch(`${WORKER_URL}/Pics/${encodeURIComponent(filename)}`, {
         method: "PUT",
-        headers: { "Content-Type": file.type },
+        headers: { 
+            "Content-Type": file.type,
+            "Authorization": `Bearer ${Token}`
+        },
         body: file,
     });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
 
     if (!response.ok) {
         throw new Error(`Fehler beim Hochladen von ${filename}: ${response.status}`);
@@ -336,6 +409,8 @@ function handleDemoClick() {
 }
 
 async function handleLoginClick() {
+    console.log("Login button clicked");
+
     const pwd = document.getElementById("password").value;
     const response = await fetch(`${WORKER_URL}/Login`, {
         method: "POST",
@@ -347,7 +422,15 @@ async function handleLoginClick() {
 
 
     if (response.ok) {
+        console.log("Login successful");
+        Token = (await response.json()).token;
+        localStorage.setItem(TOKEN_KEY, Token);
         loginSuccessful = true;
+        await init();
+        switchState();
+        addLine();
+        startUp();
+        renderCollapsibles();
     } else {
         throw new Error(`Fehler beim Login: ${response.status}`);
     }
@@ -369,7 +452,6 @@ function startUp(){
     removeLineBtn = document.getElementById("removeLineBtn");
     ToggleDebugBtn = document.getElementById("ToggleDebug");
     //DemoBtn = document.getElementById("DemoBtn");
-    LoginBtn = document.getElementById("loginBtn");
 
     newQuoteBtn.removeEventListener('click', handleOpenClick);
     newQuoteBtn.addEventListener('click', handleOpenClick);
@@ -400,9 +482,6 @@ function startUp(){
 
     //DemoBtn.removeEventListener('click', handleDemoClick);
     //DemoBtn.addEventListener('click', handleDemoClick);
-
-    LoginBtn.removeEventListener('click', handleLoginClick);
-    LoginBtn.addEventListener('click', handleLoginClick);
 }
 
 async function init() {
@@ -617,7 +696,7 @@ export function renderCollapsibles(){
         }
 
         const PID = h.getID();
-        const PPic = h.getSrc();
+        const PPic = resolveImageUrl(h.getSrc());
         const PName = h.getName();
         const QCOunt = collectQuotes(PID).length;
         if (QCOunt == 0) continue;
@@ -818,6 +897,11 @@ await getLoginEnabled()
 
 console.log("Login required:", loginRequired);
 console.log("Login successful:", loginSuccessful);
+
+if (loginRequired){
+    LoginBtn = document.getElementById("loginBtn");
+    LoginBtn.addEventListener('click', handleLoginClick);
+}
 
 if (loginSuccessful || !loginRequired){
     await init();

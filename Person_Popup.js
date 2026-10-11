@@ -1,11 +1,11 @@
-import { savePersons, Persons, createPersonID, showImg, uploadAvatar, renderCollapsibles } from "./app.js";
+import { savePersons, Persons, createPersonID, showImg, uploadAvatar, renderCollapsibles, resolveImageUrl, cacheUploadedImage } from "./app.js";
 import { Person } from "./Person.js";
 import { openErrorPopup } from "./Error_Popup.js";
 
 let overlay = null;
 
 export function openPersonPopup(text = "Neue Person", person = null) {
-    const PPic = person ? person.picUrl : "assets/Portrait-Placeholder.png";
+    const PPic = person ? resolveImageUrl(person.picUrl) : "assets/Portrait_Placeholder.png";
     const PSal = person ? person.salutation : null;
     const PFN = person && person.firstName ? person.firstName : "";
     const PLN = person ? person.lastName : "";
@@ -134,6 +134,7 @@ export function openPersonPopup(text = "Neue Person", person = null) {
             const filename = `${person.getName()}.${extension}`;
             try {
                 const picUrl = await uploadAvatar(file, filename);
+                cacheUploadedImage(picUrl, file);
                 person.changePic(picUrl);
             } catch (err) {
                 console.error(err);

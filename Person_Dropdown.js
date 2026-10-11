@@ -1,4 +1,5 @@
 import { openPersonPopup } from "./Person_Popup.js";
+import { resolveImageUrl } from "./app.js";
 
 function personLabel(person) {
     const firstPart = person.firstName ? person.firstName : person.salutation;
@@ -65,7 +66,7 @@ export function createPersonDropdown(idSuffix, persons) {
             item.dataset.id = person.id;
 
             const img = document.createElement('img');
-            img.src = person.picUrl || '';
+            img.src = resolveImageUrl(person.picUrl) || '';
             img.alt = '';
 
             const span = document.createElement('span');
@@ -86,7 +87,7 @@ export function createPersonDropdown(idSuffix, persons) {
     function selectPerson(person) {
         lastSelectedPerson = person;
         wrapper.dataset.selectedId = person.id;
-        toggleAvatar.src = person.picUrl || '';
+        toggleAvatar.src = resolveImageUrl(person.picUrl) || '';
         toggleAvatar.hidden = false;
         searchInput.value = personLabel(person);
         updateInputWidth(personLabel(person));
@@ -96,7 +97,7 @@ export function createPersonDropdown(idSuffix, persons) {
         if (lastSelectedPerson) {
             searchInput.value = personLabel(lastSelectedPerson);
             wrapper.dataset.selectedId = lastSelectedPerson.id;
-            toggleAvatar.src = lastSelectedPerson.picUrl || '';
+            toggleAvatar.src = resolveImageUrl(lastSelectedPerson.picUrl) || '';
             toggleAvatar.hidden = false;
             updateInputWidth(personLabel(lastSelectedPerson));
         } else {
