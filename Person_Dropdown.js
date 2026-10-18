@@ -1,17 +1,12 @@
 import { openPersonPopup } from "./Person_Popup.js";
-import { resolveImageUrl } from "./app.js";
+import { resolveImageUrl, Persons } from "./app.js";
 
 function personLabel(person) {
     const firstPart = person.firstName ? person.firstName : person.salutation;
     return firstPart ? `${firstPart} ${person.lastName}` : person.lastName;
 }
 
-/**
- * @param {string|number} idSuffix - "" for the first field, lineCount for dynamically added rows
- * @param {Array} persons - array of Person objects/instances (id, salutation, firstName, lastName, picUrl)
- * @returns {HTMLElement} the finished .person-dropdown element to insert into the DOM
- */
-export function createPersonDropdown(idSuffix, persons) {
+export function createPersonDropdown(idSuffix) {
     const wrapper = document.createElement('div');
     wrapper.className = 'person-dropdown';
     wrapper.id = `personDropdown${idSuffix}`;
@@ -65,9 +60,7 @@ export function createPersonDropdown(idSuffix, persons) {
             item.setAttribute('role', 'option');
             item.dataset.id = person.id;
 
-            if (person.getID() == 0) {
-
-            }else {
+            if (!person.isEinschub()) {
                 const img = document.createElement('img');
                 img.src = resolveImageUrl(person.picUrl) || '';
                 img.alt = '';
@@ -92,8 +85,10 @@ export function createPersonDropdown(idSuffix, persons) {
     function selectPerson(person) {
         lastSelectedPerson = person;
         wrapper.dataset.selectedId = person.id;
-        toggleAvatar.src = resolveImageUrl(person.picUrl) || '';
-        toggleAvatar.hidden = false;
+        if (!person.isEinschub()){
+            toggleAvatar.src = resolveImageUrl(person.picUrl) || '';
+            toggleAvatar.hidden = false;
+        }
         searchInput.value = personLabel(person);
         updateInputWidth(personLabel(person));
     }
@@ -102,8 +97,10 @@ export function createPersonDropdown(idSuffix, persons) {
         if (lastSelectedPerson) {
             searchInput.value = personLabel(lastSelectedPerson);
             wrapper.dataset.selectedId = lastSelectedPerson.id;
-            toggleAvatar.src = resolveImageUrl(lastSelectedPerson.picUrl) || '';
-            toggleAvatar.hidden = false;
+            if (!lastSelectedPerson.isEinschub()){
+                toggleAvatar.src = resolveImageUrl(lastSelectedPerson.picUrl) || '';
+                toggleAvatar.hidden = false;
+            }
             updateInputWidth(personLabel(lastSelectedPerson));
         } else {
             searchInput.value = '';
@@ -123,7 +120,7 @@ export function createPersonDropdown(idSuffix, persons) {
     }
 
     function filterAndRender(searchTerm) {
-        const filtered = persons.filter(person =>
+        const filtered = Persons.filter(person =>
             personLabel(person).toLowerCase().includes(searchTerm.toLowerCase())
         );
         renderList(filtered);

@@ -2,9 +2,10 @@ import { QuoteLines } from "./app.js";
 
 export class Quote {
 
-    constructor(ID, LINEIDS = []){
+    constructor(ID, LINEIDS = [], HIDDEN = false){
         this.id = ID;
         this.lineIds = LINEIDS;
+        this.hidden = HIDDEN;
     }
 
     getLineIDs(){
@@ -25,6 +26,10 @@ export class Quote {
 
     getID(){
         return this.id;
+    }
+
+    isHidden(){
+        return this.hidden;
     }
 
     changeID(newID){

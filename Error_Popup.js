@@ -2,7 +2,7 @@ let overlay = null;
 
 export function openErrorPopup(errMsg) {
     overlay = document.createElement('div');
-    overlay.className = 'overlay';
+    overlay.classList = 'errorOverlay active';
     overlay.innerHTML = `
         <div class="person-popup">
             <h2>Fehler</h2>

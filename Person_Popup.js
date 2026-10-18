@@ -100,30 +100,70 @@ export function openPersonPopup(text = "Neue Person", person = null) {
 
     person ? saveBtn.addEventListener('click', async () => {
         const editedPerson = Persons.find(p => p.getID() == person.getID());
-        if (Salutation.value === "" && FirstName.value === "") {
-            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
-            return;
-        } else if (Salutation.value !== "" && FirstName.value !== "") {
-            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
-            return;
+        if (LastName.value.trim() === ""){
+            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Ein Nachname ist Pflicht");
+                return;
+            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides. Ein Nachname ist Pflicht");
+                return;
+            }
+        } else {
+            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
+                return;
+            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
+                return;
+            }
+        }
+
+        for (let p of Persons){
+            if (p.getName() == editedPerson.getName()){
+                openErrorPopup("Diese Person existiert bereits.");
+                return;
+            }
+        }
+
+        const file = Avatar.files[0];
+        if (file) {
+            const extension = file.name.split('.').pop();
+            const filename = `${editedPerson.getName()}.${extension}`;
+            try {
+                const picUrl = await uploadAvatar(file, filename);
+                cacheUploadedImage(picUrl, file);
+                editedPerson.changePic(picUrl);
+            } catch (err) {
+                console.error(err);
+                openErrorPopup("Bild konnte nicht hochgeladen werden.");
+            }
         }
 
         editedPerson.salutation = Salutation.value || null;
         editedPerson.firstName = FirstName.value || null;
         editedPerson.lastName = LastName.value;
         editedPerson.tag = Tag.value;
-        editedPerson.changePic(PPic);
         savePersons();
         closePopup();
         renderCollapsibles();
         
     }) : saveBtn.addEventListener('click', async () => {
-        if (Salutation.value === "" && FirstName.value === "") {
-            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
-            return;
-        } else if (Salutation.value !== "" && FirstName.value !== "") {
-            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
-            return;
+        if (LastName.value.trim() === ""){
+            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Ein Nachname ist Pflicht");
+                return;
+            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides. Ein Nachname ist Pflicht");
+                return;
+            }
+        } else {
+            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
+                return;
+            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
+                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
+                return;
+            }
         }
 
         const person = (FirstName.value === "")

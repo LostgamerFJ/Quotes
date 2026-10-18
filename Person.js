@@ -26,10 +26,18 @@ export class Person {
     }
 
     getName(){
-        if (this.tag === "Einschub"){
+        if (this.isEinschub()){
             return "";
         } else {
             return this.firstName ? this.firstName + ' ' + this.lastName : this.salutation + ' ' + this.lastName
+        }
+    }
+
+    isEinschub(){
+        if (this.tag === "Einschub"){
+            return true;
+        } else {
+            return false;
         }
     }
 
