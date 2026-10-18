@@ -4,12 +4,12 @@ export function openErrorPopup(errMsg) {
     overlay = document.createElement('div');
     overlay.classList = 'errorOverlay active';
     overlay.innerHTML = `
-        <div class="person-popup">
+        <div class="error-popup">
             <h2>Fehler</h2>
 
             <p id="errorMessage">${errMsg}</p>
 
-            <div class="person-popup-footer">
+            <div class="error-popup-footer">
                 <button class="btn-secondary" id="Okay">Okay</button>
             </div>
         </div>

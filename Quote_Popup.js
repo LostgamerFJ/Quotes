@@ -1,7 +1,8 @@
 import { Quote } from "./Quote.js";
 import { createPersonDropdown, getSelectedPersonId } from "./Person_Dropdown.js";
 import { openErrorPopup } from "./Error_Popup.js";
-import { Quotes, createQuoteID, saveLines, saveQuotes, saveAll, renderCollapsibles } from "./app.js";
+import { Quotes, createQuoteID, saveLines, saveQuotes, saveAll, renderCollapsibles, createLineID, QuoteLines } from "./app.js";
+import { QuoteLine } from "./QuoteLine.js";
 
 let overlay = null;
 let lineCount = 0;
@@ -38,12 +39,6 @@ export function openQuotePopup(text = "Neues Zitat") {
     const resetBtn = document.getElementById("resetBtn");
     const cancelBtn = document.getElementById("closeXBtn");
     const saveBtn = document.getElementById("saveBtn");
-
-    overlay.addEventListener('click', (event) => {
-        if (event.target === overlay) {
-            closePopup();
-        }
-    });
 
     extraFieldBtn.addEventListener('click', () => {
         addLine();
@@ -102,19 +97,33 @@ function collectLines() {
         const quoteField = document.getElementById(`Quote${suffix}`);
         const contextField = document.getElementById(`Context${suffix}`);
 
+        let notes;
+        let quote;
+        let context
+
         if (getSelectedPersonId(dropdown) == null){
             openErrorPopup("Bitte wähle eine Person aus.");
-            return
+            throw new Error("No Person selected")
         }
-
-        const notes = notesField.value ? `(${notesField.value})` : null;
-        const quote = quoteField.value ? `"${quoteField.value}"` : null;
-        const context = contextField.value ? `(${contextField})` : null;
+        
+        if (getSelectedPersonId(dropdown) == 0){
+            notes = notesField.value ? `(${notesField.value})` : null;
+            quote = quoteField.value ? `(${quoteField.value})` : null;
+            context = contextField.value ? `(${contextField.value})` : null; 
+        } else {
+            notes = notesField.value ? `(${notesField.value})` : null;
+            quote = quoteField.value ? `"${quoteField.value}"` : null;
+            context = contextField.value ? `(${contextField.value})` : null;
+        }
 
         if (notes == null && quote == null && context == null){
             openErrorPopup("Bitte gib ein Zitat, Notizen oder Kontext an.");
-            return
+            throw new Error("No Quote, Notes and Context")
         }
+
+        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), quote, notes, context)
+        QuoteLines.push(newLine);
+        lines.push(newLine);
     }
     return lines;
 }

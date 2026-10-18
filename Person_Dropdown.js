@@ -18,7 +18,7 @@ export function createPersonDropdown(idSuffix) {
         </div>
         <div class="person-dropdown-panel" hidden>
             <ul class="person-dropdown-list" role="listbox"></ul>
-            <button type="button" class="person-dropdown-add" width="100%">+ Neue Person hinzufügen</button>
+            <button type="button" class="person-dropdown-add">+ Neue Person hinzufügen</button>
         </div>
     `;
 
@@ -88,6 +88,8 @@ export function createPersonDropdown(idSuffix) {
         if (!person.isEinschub()){
             toggleAvatar.src = resolveImageUrl(person.picUrl) || '';
             toggleAvatar.hidden = false;
+        } else if(person.isEinschub()){
+            toggleAvatar.hidden = true;
         }
         searchInput.value = personLabel(person);
         updateInputWidth(personLabel(person));
@@ -100,6 +102,8 @@ export function createPersonDropdown(idSuffix) {
             if (!lastSelectedPerson.isEinschub()){
                 toggleAvatar.src = resolveImageUrl(lastSelectedPerson.picUrl) || '';
                 toggleAvatar.hidden = false;
+            } else if(lastSelectedPerson.isEinschub()){
+                toggleAvatar.hidden = true;
             }
             updateInputWidth(personLabel(lastSelectedPerson));
         } else {

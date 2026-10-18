@@ -160,11 +160,11 @@ async function getAll() {
     ]);
 
     Persons = (personsRaw || []).map(p => Person.fromJSON(p));
-    PersonCounter = Persons.reduce((max, p) => Math.max(max, p.getID() + 1), 0);
+    PersonCounter = Persons.reduce((max, p) => Math.max(max, p.getID()), 0) + 1;
     QuoteLines = (quoteLinesRaw || []).map(z => QuoteLine.fromJSON(z));
-    LineCounter = QuoteLines.reduce((max, l) => Math.max(max, l.getID() + 1), 0);
+    LineCounter = QuoteLines.reduce((max, l) => Math.max(max, l.getID()), 0) + 1;
     Quotes = (quotesRaw || []).map(q => Quote.fromJSON(q));
-    QuoteCounter = Quotes.reduce((max, q) => Math.max(max, q.getID() + 1), 0);
+    QuoteCounter = Quotes.reduce((max, q) => Math.max(max, q.getID()), 0) + 1;
 
     console.log("Daten geladen:", { Persons, QuoteLines, Quotes });
 }
@@ -274,7 +274,13 @@ async function handleLoginClick() {
         startUp();
         renderCollapsibles();
     } else {
-        document.getElementById("login").append('<p>Das hat nicht funktioniert. Versuche es entweder nochmal oder wende dich an Felix.</p>');
+        if (document.getElementById("LoginErr") != null){
+            document.getElementById("LoginErr").remove();
+        }
+        let Fehlermeldung = document.createElement("p");
+        Fehlermeldung.className = "LoginErr";
+        Fehlermeldung.textContent("Das hat nicht funktioniert. Versuche es entweder nochmal oder wende dich an Felix.");
+        document.getElementById("login").append();
         throw new Error(`Fehler beim Login: ${response.status}`);
     }
 }
@@ -306,6 +312,7 @@ function startUp(){
 async function init() {
     try {
         await getAll();
+        await preloadAllImages(Persons);
     } catch (err) {
         console.error('Konnte Daten nicht laden:', err);
     }
@@ -381,7 +388,7 @@ function findMissedIDs(){
     console.log("Missed Quote IDs:", missedQuoteIDs);
 }
 
-function createLineID(){
+export function createLineID(){
     findMissedIDs();
     if (missedLineIDs.length > 0){
         return missedLineIDs.shift();
@@ -458,7 +465,7 @@ function handleMouseEnter(element) {
 
 function handleMouseLeave(element) {
     element.style.backgroundColor = '#eee';
-    PersonEditBtn.removeEventListener("click", handlePersonEditClick);
+    PersonEditBtn ?? PersonEditBtn.removeEventListener("click", handlePersonEditClick);
     PersonEditBtn = null;
     if (Debug){
         element.innerHTML = `
@@ -511,7 +518,7 @@ export function renderCollapsibles(){
         const QCOunt = collectQuotes(PID).length;
         if (QCOunt == 0) continue;
         const newColl = document.createElement("div");
-        newColl.id = ` FullCollapsible${PID}`;
+        newColl.id = `FullCollapsible${PID}`;
         newColl.className = "CollDiv"
         if (Debug){
             newColl.innerHTML = `
@@ -549,6 +556,7 @@ export function renderCollapsibles(){
         const content = document.getElementById(`quotes${PID}`)
         let quotesDone = 0;
         for (let quotes of collectQuotes(PID)){
+            if (quotes.isHidden()){continue}
             quotesDone ++;
             const newQuote = document.createElement("div");
             newQuote.id = `Quote${quotes.getID()}`
@@ -601,7 +609,7 @@ export function renderCollapsibles(){
                 }
             }
 
-            newQuote.addEventListener
+            //newQuote.addEventListener('click', handleQuoteEditClick); Quote Popup to edit goes here
 
             content.appendChild(newQuote);
         }
@@ -627,9 +635,7 @@ export function renderCollapsibles(){
         `;
         document.getElementById("categoryThingy").appendChild(Unassigned);
         for (let missed of Quotes){
-            let quotesDone = 0;
             if (!QuotesDone.includes(missed)){
-                quotesDone ++;
                 const newQuote = document.createElement("p");
                 const lines = missed.getLines();
                 let tempQuotes = "";
@@ -653,7 +659,7 @@ export function renderCollapsibles(){
                 } else {
                     if (lines.length > 1){
                         for (let lins of lines){
-                            tempQuotes += `<p>Unassigned${lins.assembleMultiple()}</p>`
+                            tempQuotes += `<p>Unassigned: ${lins.assembleMultiple()}</p>`
                         }
                         newQuote.innerHTML = tempQuotes;
                     } else{

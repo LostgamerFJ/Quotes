@@ -100,28 +100,30 @@ export function openPersonPopup(text = "Neue Person", person = null) {
 
     person ? saveBtn.addEventListener('click', async () => {
         const editedPerson = Persons.find(p => p.getID() == person.getID());
-        if (LastName.value.trim() === ""){
-            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Ein Nachname ist Pflicht");
-                return;
-            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides. Ein Nachname ist Pflicht");
-                return;
-            }
-        } else {
-            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
-                return;
-            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
-                return;
-            }
+        const LastNameValue = LastName.value.trim() === "" ? null : LastName.value.trim;
+
+        if (LastNameValue === null){
+            openErrorPopup("Bitte gib einen Nachnamen an.");
+            return
+        }
+        if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
+            return;
+        } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
+            return;
         }
 
+
+
         for (let p of Persons){
-            if (p.getName() == editedPerson.getName()){
-                openErrorPopup("Diese Person existiert bereits.");
-                return;
+            if (p.getID() === editedPerson.getID()){
+                return
+            } else{
+                if (p.getName() == editedPerson.getName()){
+                    openErrorPopup("Diese Person existiert bereits.");
+                    return;
+                }
             }
         }
 
@@ -148,22 +150,18 @@ export function openPersonPopup(text = "Neue Person", person = null) {
         renderCollapsibles();
         
     }) : saveBtn.addEventListener('click', async () => {
-        if (LastName.value.trim() === ""){
-            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Ein Nachname ist Pflicht");
-                return;
-            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides. Ein Nachname ist Pflicht");
-                return;
-            }
-        } else {
-            if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
-                return;
-            } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
-                openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
-                return;
-            }
+        const LastNameValue = LastName.value.trim() === "" ? null : LastName.value.trim;
+        
+        if (LastNameValue === null){
+            openErrorPopup("Bitte gib einen Nachnamen an.");
+            return
+        }
+        if (Salutation.value.trim() === "" && FirstName.value.trim() === "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an.");
+            return;
+        } else if (Salutation.value.trim() !== "" && FirstName.value.trim() !== "") {
+            openErrorPopup("Bitte gib entweder eine Anrede oder einen Vornamen an. Nicht beides.");
+            return;
         }
 
         const person = (FirstName.value === "")
@@ -195,7 +193,8 @@ export function openPersonPopup(text = "Neue Person", person = null) {
 
         Persons.push(person);
         savePersons();
-        closePopup();})
+        closePopup();
+    })
 }
 
 function reset(title = "Neue Person", person = null) {
