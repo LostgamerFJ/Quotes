@@ -1,0 +1,951 @@
+import { Quote } from './Quote.js';
+import { QuoteLine } from './QuoteLine.js';
+import { Person } from './Person.js';
+import { createPersonDropdown, getSelectedPersonId } from './Person_Dropdown.js';
+import { openPersonPopup } from './Person_Popup.js';
+import { openErrorPopup } from './Error_Popup.js';
+
+const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
+
+export let Persons = [];
+export let QuoteLines = [];
+let Quotes = [];
+
+let Teachers = [];
+let Students = [];
+let Rest = [];
+
+let missedPersonIDs = [];
+let missedLineIDs = [];
+let missedQuoteIDs = [];
+
+let activePersonIDs = [];
+let QuotesDone = [];
+
+export let PersonCounter = null;
+let LineCounter = null;
+let QuoteCounter = null;
+
+let lineCount = 0;
+
+let Debug = false;
+
+const personDropdowns = new Map();
+
+let overlay = null;
+let newQuoteBtn = null;
+let closeXBtn = null;
+let saveBtn = null;
+let saveAllBtn = null;
+let extraFieldBtn = null;
+let resetBtn = null;
+let removeLineBtn = null;
+let ToggleDebugBtn = null;
+let DemoBtn = null;
+let LoginBtn = null;
+let EditBtn = null;
+
+let loginRequired = true;
+const TOKEN_KEY = "quotesToken";
+let Token = localStorage.getItem(TOKEN_KEY);
+let loginSuccessful = Token !== null;
+
+const imageCache = new Map();
+const PLACEHOLDER_URL = "./assets/Portrait_Placeholder.png";
+const WORKER_PICS_PREFIX = `${WORKER_URL}/Pics/`;
+
+function isWorkerImage(picUrl) {
+    return typeof picUrl === "string" && picUrl.startsWith(WORKER_PICS_PREFIX);
+}
+
+async function preloadImage(picUrl) {
+    if (!isWorkerImage(picUrl) || imageCache.has(picUrl)) return;
+
+    const response = await fetch(picUrl, {
+        headers: { "Authorization": `Bearer ${Token}` }
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Fehler beim Laden von ${picUrl}: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    imageCache.set(picUrl, URL.createObjectURL(blob));
+}
+
+export async function preloadAllImages(persons) {
+    const results = await Promise.allSettled(persons.map(p => preloadImage(p.getSrc())));
+    results
+        .filter(r => r.status === "rejected")
+        .forEach(r => console.error(r.reason));
+}
+
+export function resolveImageUrl(picUrl) {
+    if (!isWorkerImage(picUrl)) return picUrl;
+    return imageCache.get(picUrl) ?? PLACEHOLDER_URL;
+}
+
+export function cacheUploadedImage(picUrl, file) {
+    const old = imageCache.get(picUrl);
+    if (old) URL.revokeObjectURL(old);
+    imageCache.set(picUrl, URL.createObjectURL(file));
+}
+
+async function loadRoute(route) {
+    const response = await fetch(`${WORKER_URL}/${route}`,{
+        headers: {
+            "Authorization": `Bearer ${Token}`
+        }
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Fehler beim Laden von ${route}: ${response.status}`);
+    }
+
+    const text = await response.text();
+
+    return text.trim() ? JSON.parse(text) : [];
+}
+
+function formatArray(array) {
+    return "[\n" + array.map(obj => JSON.stringify(obj)).join(",\n") + "\n]";
+}
+
+async function saveRoute(route, array) {
+    const response = await fetch(`${WORKER_URL}/${route}`, {
+        method: "PUT",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Token}`
+         },
+        body: formatArray(array),
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Fehler beim Speichern von ${route}: ${response.status}`);
+    }
+}
+
+export async function uploadAvatar(file, filename) {
+    const response = await fetch(`${WORKER_URL}/Pics/${encodeURIComponent(filename)}`, {
+        method: "PUT",
+        headers: { 
+            "Content-Type": file.type,
+            "Authorization": `Bearer ${Token}`
+        },
+        body: file,
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.reload();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Fehler beim Hochladen von ${filename}: ${response.status}`);
+    }
+
+    return `${WORKER_URL}/Pics/${encodeURIComponent(filename)}`;
+}
+
+async function getAll() {
+    const [personsRaw, quoteLinesRaw, quotesRaw] = await Promise.all([
+        loadRoute("Persons"),
+        loadRoute("QuoteLines"),
+        loadRoute("Quotes"),
+    ]);
+
+    Persons = (personsRaw || []).map(p => Person.fromJSON(p));
+    PersonCounter = Persons.reduce((max, p) => Math.max(max, p.getID()), 0);
+    QuoteLines = (quoteLinesRaw || []).map(z => QuoteLine.fromJSON(z));
+    LineCounter = QuoteLines.reduce((max, l) => Math.max(max, l.getID()), 0);
+    Quotes = (quotesRaw || []).map(q => Quote.fromJSON(q));
+    QuoteCounter = Quotes.reduce((max, q) => Math.max(max, q.getID()), 0);
+
+    console.log("Daten geladen:", { Persons, QuoteLines, Quotes });
+}
+
+async function getLoginEnabled() {
+    const response = await fetch(`${WORKER_URL}/LoginEnabled`, {
+        method: "GET"
+    });
+    loginRequired = (await response.json()).enabled;
+}
+
+export async function savePersons() {
+    Persons.sort((a, b) => a.getID() - b.getID());
+    await saveRoute("Persons", Persons);
+}
+
+async function saveLines() {
+    QuoteLines.sort((a, b) => a.getID() - b.getID());
+    await saveRoute("QuoteLines", QuoteLines);
+}
+
+async function saveQuotes() {
+    Quotes.sort((a, b) => a.getID() - b.getID());
+    await saveRoute("Quotes", Quotes);
+}
+
+async function saveAll() {
+    await Promise.all([
+        savePersons(),
+        saveLines(),
+        saveQuotes(),
+    ]);
+}
+
+function mountPersonDropdown(idSuffix, slotElement) {
+    const dropdown = createPersonDropdown(idSuffix);
+    slotElement.appendChild(dropdown);
+    personDropdowns.set(idSuffix, dropdown);
+}
+
+function collectLines() {
+    const lines = [];
+
+    for (const suffix of personDropdowns.keys()) {
+        const dropdown = personDropdowns.get(suffix);
+        const notesField = document.getElementById(`Notes${suffix}`);
+        const quoteField = document.getElementById(`Quote${suffix}`);
+        const contextField = document.getElementById(`Context${suffix}`);
+
+        if(getselectedPersonId(dropdown) != null) {
+            if (!quoteField.value) {
+                if (!notesField.value) {
+                    if (contextField.value) {
+                        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `quoteField.value`, notesField.value, `(${contextField.value})`);
+                        QuoteLines.push(newLine);
+                        lines.push(newLine);
+                    } else {
+                        openErrorPopup("Bitte gib ein Zitat, Notizen oder Kontext an.");
+                    }
+                } else {
+                    if (!contextField.value){
+                        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `quoteField.value`, `(${notesField.value})`, contextField.value);
+                        QuoteLines.push(newLine);
+                        lines.push(newLine);
+                    } else {
+                        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `quoteField.value`, `(${notesField.value})`, `(${contextField.value})`);
+                        QuoteLines.push(newLine);
+                        lines.push(newLine);
+                    }
+                }
+            } else {
+                if (!notesField.value) {
+                    if (contextField.value) {
+                        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, notesField.value, `(${contextField.value})`);
+                        QuoteLines.push(newLine);
+                        lines.push(newLine);
+                    } else {
+                        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`);
+                        QuoteLines.push(newLine);
+                        lines.push(newLine);
+                    }
+                } else {
+                    if (!contextField.value){
+                        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, contextField.value);
+                        QuoteLines.push(newLine);
+                        lines.push(newLine);
+                    } else {
+                        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), `"${quoteField.value}"`, `(${notesField.value})`, `(${contextField.value})`);
+                        QuoteLines.push(newLine);
+                        lines.push(newLine);
+                    }
+                }
+            }
+        } else {
+            openErrorPopup("Bitte wähle eine Person aus.");
+        }
+    }
+    return lines;
+}
+
+function resetPopup(){
+    lineCount = 0;
+    document.getElementById("quote-popup").innerHTML = `
+        <h2>Neues Zitat</h2>
+
+        <div class="left-action">
+            <button class="btn-seamless" id="extraFieldBtn">+ Weitere Zeile</button>
+            <button class="btn-seamless" id="removeLineBtn">- Letzte Zeile entfernen</button>
+        </div>
+
+        <div class="quote-popup-footer">
+            <button class="btn-secondary" id="resetBtn">Zurücksetzen</button>
+            <button class="btn-secondary" id="closeXBtn" aria-label="Schließen">Abbrechen</button>
+            <button class="btn-primary" id="saveBtn">Speichern</button>
+        </div>
+    `;
+    personDropdowns.clear();
+    startUp();
+    addLine();
+}
+
+function fullReset(){
+    document.getElementById("categoryThingy").innerHTML = `
+        <div class="category">
+            <p class="category-label">Lehrende</p>
+            <div id="TeacherCollapsibles"></div>
+        </div>
+
+        <div class="category">
+            <p class="category-label">Schüler*innen</p>
+            <div id="StudentCollapsibles"></div>
+        </div>
+    `;
+    resetPopup();
+    startUp();
+    renderCollapsibles();
+}
+
+function addLine(){
+    const newLine = document.createElement('div');
+    newLine.className = 'field-line field-line-quote';
+    newLine.id = `field-line${lineCount}`
+    newLine.innerHTML = `
+        <div class="field field-person">
+            <label>Person</label>
+            <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
+        </div>
+        <div class="field field-notes">
+            <label for="Notes${lineCount}">Notiz</label>
+            <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
+        </div>
+        <div class="field field-quote">
+            <label for="Quote${lineCount}">Zitat</label>
+            <textarea rows="1" id="Quote${lineCount}"></textarea>
+        </div>
+        <div class="field field-context">
+            <label for="Context${lineCount}">Kontext</label>
+            <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
+        </div>
+    `;
+
+    const leftAction = document.querySelector('.left-action');
+    leftAction.parentNode.insertBefore(newLine, leftAction);
+
+    const slot = newLine.querySelector(`#personSlot${lineCount}`);
+    mountPersonDropdown(lineCount, slot);
+
+    newLine.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+    });
+    lineCount++;
+}
+
+function removeLastLine(){
+    const lines = document.querySelectorAll(".field-line-quote");
+    const lastLine = lines[lines.length - 1];
+    if (!lastLine) return;
+    if (lines.length == 1) return;
+    lastLine.remove();
+    const suffix = Array.from(personDropdowns.keys());
+    personDropdowns.delete(suffix[suffix.length - 1])
+    lineCount--;
+}
+
+function handleOpenClick() {
+    overlay.classList.add('active');
+}
+
+function handleCloseClick() {
+    overlay.classList.remove('active');
+}
+
+function handleOverlayClick(event) {
+    if (event.target === overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+function handleSaveClick() {
+    const lines = collectLines();
+    let ids = [];
+    for (let i of lines){
+        ids.push(i.getID());
+    }
+    saveLines();
+    Quotes.push(new Quote(createQuoteID(), ids));
+    saveQuotes();
+    overlay.classList.remove('active');
+    saveAll();
+    fullReset();
+}
+
+function handleSaveAllClick() {
+    saveAll();
+}
+
+function handleResetClick() {
+    resetPopup();
+}
+
+function handleExtraFieldClick() {
+    addLine();
+}
+
+function handleRemoveLineClick() {
+    removeLastLine();
+}
+
+function handeToggleDebugClick(){
+    Debug = !Debug;
+
+    renderCollapsibles();
+}
+
+function handleDemoClick() {
+    Persons = []
+    QuoteLines = []
+    Quotes = []
+
+    Persons.push(new Person(createPersonID(), "Klumpner", "Teacher", "Default", "Herr"));
+    Persons.push(new Person(createPersonID(), "Dollinger", "Teacher", "Default", "Herr"));
+    Persons.push(new Person(createPersonID(), "Paula", "Student", "Default", null, "Jakob"));
+    Persons.push(new Person(createPersonID(), "Fürst", "Student", "Default", null , "Felix"));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), ` „Aber wenn sie den KAL erst am Ende herausgeben, kann doch keiner aufpassen, weil wir so gespannt sind.“`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[3].getID(), `"MAAAAAAAN"`, "*rennt genervt aus dem Raum*", "(nach Sanitätsdienst-Durchsage)"));
+    
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `"Ich brauch mehr Spucke im Rachen"`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[2].getID(), `„Warum geh‘ ich überhaupt auf Toilette? Ich hab nicht mal mein Handy dabei!“`));
+    
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Das Problem ist, alles was illegal ist, ist eben nicht legal.“`));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[0].getID(), `„Manche hatten Schmerzen, haben wahrscheinlich Schläge abbekommen…“`, "(lächelnd)", "(Rowdies beim Public Viewing)"));
+
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Wer hatte den Hurensohn"`, null, "(meinte einen Post, der in einem Referat gezeigt wurde)"));
+    QuoteLines.push(new QuoteLine(createLineID(), Persons[1].getID(), `"Ihr passt doch sowieso nicht auf!"`));
+
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[0].getID(), QuoteLines[7].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[1].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[2].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[3].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[4].getID()]));    
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[5].getID()]));
+    Quotes.push(new Quote(createQuoteID(), [QuoteLines[6].getID()]));
+
+    renderCollapsibles();
+}
+
+async function handleLoginClick() {
+    console.log("Login button clicked");
+
+    const pwd = document.getElementById("password").value;
+    const response = await fetch(`${WORKER_URL}/Login`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: pwd }),
+    });
+
+
+    if (response.ok) {
+        console.log("Login successful");
+        Token = (await response.json()).token;
+        localStorage.setItem(TOKEN_KEY, Token);
+        loginSuccessful = true;
+        await init();
+        switchState();
+        addLine();
+        startUp();
+        renderCollapsibles();
+    } else {
+        throw new Error(`Fehler beim Login: ${response.status}`);
+    }
+}
+
+function switchState(){
+    document.getElementById("loggedIn").classList.toggle("active");
+    document.getElementById("login").classList.toggle("active");
+}
+
+function startUp(){
+    overlay = document.getElementById('overlay');
+    newQuoteBtn = document.getElementById('newQuoteBtn');
+    closeXBtn = document.getElementById('closeXBtn');
+    saveBtn = document.getElementById('saveBtn');
+    saveAllBtn = document.getElementById('saveAllBtn');
+    extraFieldBtn = document.getElementById('extraFieldBtn');
+    resetBtn = document.getElementById("resetBtn");
+    removeLineBtn = document.getElementById("removeLineBtn");
+    ToggleDebugBtn = document.getElementById("ToggleDebug");
+    //DemoBtn = document.getElementById("DemoBtn");
+
+    newQuoteBtn.removeEventListener('click', handleOpenClick);
+    newQuoteBtn.addEventListener('click', handleOpenClick);
+
+    closeXBtn.removeEventListener('click', handleCloseClick);
+    closeXBtn.addEventListener('click', handleCloseClick);
+
+    overlay.removeEventListener('click', handleOverlayClick);
+    overlay.addEventListener('click', handleOverlayClick);
+
+    saveBtn.removeEventListener('click', handleSaveClick);
+    saveBtn.addEventListener('click', handleSaveClick);
+
+    saveAllBtn.removeEventListener('click', handleSaveAllClick);
+    saveAllBtn.addEventListener('click', handleSaveAllClick);
+
+    resetBtn.removeEventListener('click', handleResetClick);
+    resetBtn.addEventListener('click', handleResetClick);
+
+    extraFieldBtn.removeEventListener('click', handleExtraFieldClick);
+    extraFieldBtn.addEventListener('click', handleExtraFieldClick);
+
+    removeLineBtn.removeEventListener('click', handleRemoveLineClick);
+    removeLineBtn.addEventListener('click', handleRemoveLineClick);
+
+    ToggleDebugBtn.removeEventListener('click', handeToggleDebugClick);
+    ToggleDebugBtn.addEventListener('click', handeToggleDebugClick);
+
+    //DemoBtn.removeEventListener('click', handleDemoClick);
+    //DemoBtn.addEventListener('click', handleDemoClick);
+}
+
+async function init() {
+    try {
+        await getAll();
+    } catch (err) {
+        console.error('Konnte Daten nicht laden:', err);
+    }
+
+}
+
+function autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+document.querySelectorAll('.field textarea').forEach(textarea => {
+    textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+});
+
+export function showImg(){
+    const fileUploadInput = document.querySelector('.avatar-uploader');
+    if (!fileUploadInput.value) {
+        return;
+    }
+    const image = fileUploadInput.files[0];
+    if (!image.type.includes('image')) {
+        return alert('Nur Bild Dateien Erlaubt');
+    }
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(image);
+    fileReader.onload = (fileReaderEvent) => {
+        const profilePicture = document.querySelector('.avatar-upload');
+        profilePicture.style.backgroundImage = `url(${fileReaderEvent.target.result})`;
+    }
+}
+
+function findMissedIDs(){
+    missedPersonIDs = [];
+    missedLineIDs = [];
+    missedQuoteIDs = [];
+
+    const p = Persons.length;
+    const l = QuoteLines.length;
+    const q = Quotes.length;
+
+    for (let i = 1; i <= p; i++) {
+        let found = false;
+        for (let j = 0; j < p; j++) {
+            if (Persons[j].getID() == i) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            missedPersonIDs.push(i);
+    }
+
+    for (let i = 1; i <= l; i++) {
+        let found = false;
+        for (let j = 0; j < l; j++) {
+            if (QuoteLines[j].getID() == i) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            missedLineIDs.push(i);
+    }
+
+    for (let i = 1; i <= q; i++) {
+        let found = false;
+        for (let j = 0; j < q; j++) {
+            if (Quotes[j].getID() == i) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            missedQuoteIDs.push(i);
+    }
+    console.log("Missed Person IDs:", missedPersonIDs);
+    console.log("Missed Line IDs:", missedLineIDs);
+    console.log("Missed Quote IDs:", missedQuoteIDs);
+}
+
+function createLineID(){
+    findMissedIDs();
+    if (missedLineIDs.length > 0){
+        return missedLineIDs.shift();
+    } else {
+        LineCounter ++;
+        return LineCounter;
+    }
+}
+
+function createQuoteID(){
+    findMissedIDs();
+    if (missedQuoteIDs.length > 0){
+        return missedQuoteIDs.shift();
+    } else {
+        QuoteCounter ++;
+        return QuoteCounter;
+    }
+}
+
+export function createPersonID(){
+    findMissedIDs();
+    if (missedPersonIDs.length > 0){
+        return missedPersonIDs.shift();
+    } else {
+        PersonCounter ++;
+        return PersonCounter;
+    }
+}
+
+function clearCollapsibles(){
+    for (let colls of document.getElementsByClassName("collapsible")){
+        let nodes = [];
+        colls.childNodes.forEach(node => nodes.push(node));
+        colls.innerHTML = "";
+        colls.outerHTML = colls.outerHTML;
+        nodes.forEach(node => colls.appendChild(node));
+    }
+    document.getElementById("categoryThingy").innerHTML = `
+        <div class="category">
+            <p class="category-label">Lehrende</p>
+            <div id="TeacherCollapsibles"></div>
+        </div>
+
+        <div class="category">
+            <p class="category-label">Schüler*innen</p>
+            <div id="StudentCollapsibles"></div>
+        </div>
+    `;
+}
+
+function handleEditClick(){
+    event.stopPropagation();
+    openPersonPopup("Person bearbeiten", Persons.find(p => p.getID() == EditBtn.id.replace("editBtn", "")));
+}
+
+function handleMouseOver(element) {
+    element.backgroundColor = '#ccc';
+    if (Debug){
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">ID: ${element.dataset.pid} ${element.dataset.name}</p>
+            <img class="btn-seamless" id="editBtn${element.dataset.pid}" src="https://cdn-icons-png.flaticon.com/512/1250/1250925.png" height="10" style="margin-left: 10px" alt="Bearbeiten">
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    } else {
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">${element.dataset.name}</p>
+            <img class="btn-seamless" id="editBtn${element.dataset.pid}" src="https://cdn-icons-png.flaticon.com/512/1250/1250925.png" height="10" style="margin-left: 10px" alt="Bearbeiten">
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    }
+
+    EditBtn = document.getElementById(`editBtn${element.dataset.pid}`);
+    EditBtn.addEventListener("click", handleEditClick);
+}
+
+function handleMouseLeave(element) {
+    element.backgroundColor = '#eee';
+    EditBtn.removeEventListener("click", handleEditClick);
+    EditBtn = null;
+    if (Debug){
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">ID: ${element.dataset.pid} ${element.dataset.name}</p>
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    } else {
+        element.innerHTML = `
+            <img src="${element.dataset.PPic}" height="50">
+            <p class="name">${element.dataset.name}</p>
+            <p class="quoteCount">${element.dataset.qcount}</p>
+            <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
+        `;
+    }
+}
+
+export function renderCollapsibles(){
+    Teachers = Persons.filter(p => p.getTag() === "Teacher");
+    Students = Persons.filter(p => p.getTag() === "Student");
+    Rest = Persons.filter(p => p.getTag() !== "Teacher" && p.getTag() !== "Student");
+
+    Teachers = Teachers.sort((a, b) => a.getLastName().localeCompare(b.getLastName()));
+    Students = Students.sort((a, b) => a.getLastName().localeCompare(b.getLastName()));
+
+    Persons = []
+    Persons = Persons.concat(Teachers, Students, Rest);
+    
+    let colls;
+    clearCollapsibles();
+    QuotesDone = [];
+    for (let h of Persons){
+        if (h.getTag() == "Teacher"){
+            colls = document.getElementById("TeacherCollapsibles");
+        } else if (h.getTag() == "Student"){
+            colls = document.getElementById("StudentCollapsibles");
+        } else {
+            console.log("Person hat kein Tag: ", h);
+            continue;
+        }
+
+        const PID = h.getID();
+        const PPic = resolveImageUrl(h.getSrc());
+        const PName = h.getName();
+        const QCOunt = collectQuotes(PID).length;
+        if (QCOunt == 0) continue;
+        const newColl = document.createElement("div");
+        newColl.id = `Collapsible${PID}`;
+        newColl.className = "CollDiv"
+        if (Debug){
+            newColl.innerHTML = `
+                <div onmouseleave="this.style.backgroundColor='#eee'" class="collapsible" id="collapsible${PID}">
+                    <img src="${PPic}" height="50">
+                    <p class="name">ID: ${PID} ${PName}</p>
+                    <p class="quoteCount">${QCOunt}</p>
+                    <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
+                </div>
+                <div class="content" id="quotes${PID}"></div>
+            `;
+        } else {
+            newColl.innerHTML = `
+                <div onmouseleave="this.style.backgroundColor='#eee'" class="collapsible" id="collapsible${PID}">
+                    <img src="${PPic}" height="50">
+                    <p class="name">${PName}</p>
+                    <p class="quoteCount">${QCOunt}</p>
+                    <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
+                </div>
+                <div class="content" id="quotes${PID}"></div>
+            `;
+        }
+
+        colls.append(newColl);
+
+        const CollDiv = document.getElementById(`collapsible${PID}`);
+        CollDiv.dataset.PPic = PPic;
+        CollDiv.dataset.pid = PID;
+        CollDiv.dataset.name = PName;
+        CollDiv.dataset.qcount = QCOunt;
+
+        document.getElementById(`collapsible${PID}`).addEventListener("mouseover", () => handleMouseOver(document.getElementById(`collapsible${PID}`)));
+        document.getElementById(`collapsible${PID}`).addEventListener("mouseleave", () => handleMouseLeave(document.getElementById(`collapsible${PID}`)));
+
+        const content = document.getElementById(`quotes${PID}`)
+        let quotesDone = 0;
+        for (let quotes of collectQuotes(PID)){
+            quotesDone ++;
+            const newQuote = document.createElement("div");
+            const lines = quotes.getLines();
+            let tempQuotes = "";
+            if (Debug){
+                if (lines.length > 1){
+                    tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
+                    for (let lins of lines){
+                        if (lins.getPerson().isEinschub()){
+                            tempQuotes += `<p>LineID: ${lins.getID()} Typ: Einschub Text: ${lins.assembleMultiple()}</p>`
+                        } else {
+                            tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                        }
+                    }
+                    newQuote.innerHTML = tempQuotes;
+                } else{
+                    newQuote.innerHTML = `
+                        <p>QuoteID: ${quotes.getID()}</p>
+                        <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
+                    `;
+                }                
+                
+                if (quotesDone != collectQuotes(PID).length){
+                    newQuote.innerHTML += `<hr>`
+                }
+
+                if (!QuotesDone.includes(quotes)){
+                    QuotesDone.push(quotes);
+                }
+
+            } else {
+                if (lines.length > 1){
+                    for (let lins of lines){
+                        tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+                    }
+                    newQuote.innerHTML = tempQuotes;
+                } else{
+                    newQuote.innerHTML = `
+                        <p>${lines[0].assemble()}</p>
+                    `;
+                }
+
+                if (!QuotesDone.includes(quotes)){
+                    QuotesDone.push(quotes);
+                }
+
+                if (quotesDone != collectQuotes(PID).length){
+                    newQuote.innerHTML += `<hr>`
+                }
+            }
+            content.appendChild(newQuote);
+        }
+
+        if (activePersonIDs.includes(String(PID))){
+            newColl.querySelector(".collapsible").classList.add("active");
+            content.classList.add("no-transition");
+            content.style.maxHeight = content.scrollHeight + "px";
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    content.classList.remove("no-transition");
+                });
+            });
+        }
+    }
+
+    if (QuotesDone.length != Quotes.length){
+        const Unassigned = document.createElement("div");
+        Unassigned.id = "Unassigned";
+        Unassigned.className = "category"
+        Unassigned.innerHTML += `
+                <p class="category-label">Nicht zugeordnet:</p>
+        `;
+        document.getElementById("categoryThingy").appendChild(Unassigned);
+        for (let missed of Quotes){
+            let quotesDone = 0;
+            if (!QuotesDone.includes(missed)){
+                quotesDone ++;
+                const newQuote = document.createElement("p");
+                const lines = missed.getLines();
+                let tempQuotes = "";
+                if (Debug){
+                    if (lines.length > 1){
+                        tempQuotes += `<p>QuoteID: ${missed.getID()}</p>`
+                        for (let lins of lines){
+                            tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                        }
+                        newQuote.innerHTML = tempQuotes;
+                    } else{
+                        newQuote.innerHTML = `
+                            <p>QuoteID: ${missed.getID()}</p>
+                            <p>LineID: ${lines[0].getID()} Person: Unassigned Text: ${lines[0].assemble()}</p>
+                        `;
+                    }                
+                    
+                    newQuote.innerHTML += `<hr>`
+                    
+
+                } else {
+                    if (lines.length > 1){
+                        for (let lins of lines){
+                            tempQuotes += `<p>Unassigned${lins.assembleMultiple()}</p>`
+                        }
+                        newQuote.innerHTML = tempQuotes;
+                    } else{
+                        newQuote.innerHTML = `
+                            <p>${lines[0].assemble()}</p>
+                        `;
+                    }
+                    
+                    newQuote.innerHTML += `<hr>`;
+                }
+                Unassigned.appendChild(newQuote);
+            }
+        }
+    }
+
+
+    var coll = document.getElementsByClassName("collapsible");
+
+    for (let i of coll) {
+        i.addEventListener("click", function() {
+            const arrow = document.getElementById(`arrow${this.closest(".collapsible").dataset.pid}`);
+            if (!this.classList.contains("active")){
+                activePersonIDs.push(this.closest(".collapsible").dataset.pid);
+                arrow.style.transform = "rotate(0deg)";
+            } else {
+                const index = activePersonIDs.indexOf(this.closest(".collapsible").dataset.pid)
+                if (index > -1){
+                    activePersonIDs.splice(index, 1)
+                }
+                arrow.style.transform = "rotate(180deg)";
+            }
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.maxHeight){
+            content.style.maxHeight = null;
+            } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            }
+        });
+    }
+}
+
+function collectQuotes(personID){
+    const TempQuotes = []
+    for (let quote of Quotes) {
+        const lines = quote.getLines();
+        for (let LINES of lines){
+            if (LINES.getPID() == personID && !TempQuotes.includes(quote)){
+                TempQuotes.push(quote);
+            }
+        }
+    }
+    return TempQuotes;
+}
+
+await getLoginEnabled()
+
+console.log("Login required:", loginRequired);
+console.log("Login successful:", loginSuccessful);
+
+if (loginRequired){
+    LoginBtn = document.getElementById("loginBtn");
+    LoginBtn.addEventListener('click', handleLoginClick);
+}
+
+if (loginSuccessful || !loginRequired){
+    await init();
+    switchState();
+    addLine();
+    startUp();
+    renderCollapsibles();
+}
