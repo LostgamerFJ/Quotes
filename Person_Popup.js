@@ -118,11 +118,11 @@ export function openPersonPopup(text = "Neue Person", person = null) {
 
         for (let p of Persons){
             if (p.getID() === editedPerson.getID()){
-                return
+                continue;
             } else{
-                if (p.getName() == editedPerson.getName()){
+                if (p.getName() == editedPerson.getName(FirstName.value.trim(), LastName.value.trim(), Salutation.value.trim())){
                     openErrorPopup("Diese Person existiert bereits.");
-                    return;
+                    continue;
                 }
             }
         }

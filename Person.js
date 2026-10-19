@@ -25,11 +25,11 @@ export class Person {
         return this.picUrl;
     }
 
-    getName(){
+    getName(FN = this.firstName, LN = this.lastName, S = this.salutation){
         if (this.isEinschub()){
             return "";
         } else {
-            return this.firstName ? this.firstName + ' ' + this.lastName : this.salutation + ' ' + this.lastName
+            return FN ? FN + ' ' + LN : S + ' ' + LN
         }
     }
 
