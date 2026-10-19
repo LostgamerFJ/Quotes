@@ -3,6 +3,7 @@ import { QuoteLine } from './QuoteLine.js';
 import { Person } from './Person.js';
 import { openPersonPopup } from './Person_Popup.js';
 import { openQuotePopup } from './Quote_Popup.js';
+import { openErrorPopup } from './Error_Popup.js'
 
 const WORKER_URL = 'https://save-quotes.fuerst-felix-7ca.workers.dev';
 
@@ -33,6 +34,7 @@ let ToggleDebugBtn = null;
 let DemoBtn = null;
 let LoginBtn = null;
 let PersonEditBtn = null;
+let tempBtn = null;
 
 let loginRequired = true;
 const TOKEN_KEY = "quotesToken";
@@ -253,6 +255,10 @@ function handleDemoClick() {
     renderCollapsibles();
 }
 
+function handleTempClick(){
+    openErrorPopup("Test");
+}
+
 async function handleLoginClick() {
 
     const pwd = document.getElementById("password").value;
@@ -295,6 +301,7 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     ToggleDebugBtn = document.getElementById("ToggleDebug");
     //DemoBtn = document.getElementById("DemoBtn");
+    tempBtn = document.getElementById("tempBtn")
 
     newQuoteBtn.removeEventListener('click', handleOpenClick);
     newQuoteBtn.addEventListener('click', handleOpenClick);
@@ -307,6 +314,9 @@ function startUp(){
 
     //DemoBtn.removeEventListener('click', handleDemoClick);
     //DemoBtn.addEventListener('click', handleDemoClick);
+
+    tempBtn.removeEventListener('click', handleTempClick)
+    tempBtn.addEventListener('click', handleTempClick)
 }
 
 async function init() {
