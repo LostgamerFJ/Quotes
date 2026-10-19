@@ -322,7 +322,6 @@ function startUp(){
 async function init() {
     try {
         await getAll();
-        await preloadAllImages(Persons);
     } catch (err) {
         console.error('Konnte Daten nicht laden:', err);
     }
