@@ -470,7 +470,6 @@ function handleMouseEnter(element) {
     PersonEditBtn = document.getElementById(`personEditBtn${element.dataset.pid}`);
     PersonEditBtn.addEventListener("click", handlePersonEditClick);
 
-    console.log("mouseenter called");
 }
 
 function handleMouseLeave(element) {
@@ -493,7 +492,6 @@ function handleMouseLeave(element) {
         `;
     }
 
-    console.log("mouseleave Called")
 }
 
 export function renderCollapsibles(){
@@ -737,7 +735,9 @@ if (loginRequired){
 
 if (loginSuccessful || !loginRequired){
     await init();
+    renderCollapsibles();
     switchState();
     startUp();
+    await preloadAllImages(Persons);
     renderCollapsibles();
 }
