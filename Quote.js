@@ -41,7 +41,7 @@ export class Quote {
     }
 
     static fromJSON(obj){
-        return new Quote(obj.id, obj.lineIds, obj.hidden = false)
+        return new Quote(obj.id, obj.lineIds, obj.hidden)
     }
 
 }
