@@ -2,7 +2,7 @@ import { QuoteLines } from "./app.js";
 
 export class Quote {
 
-    constructor(ID, LINEIDS = [], HIDDEN = false){
+    constructor(ID, LINEIDS = [], HIDDEN){
         this.id = ID;
         this.lineIds = LINEIDS;
         this.hidden = HIDDEN;

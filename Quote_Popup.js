@@ -63,7 +63,7 @@ export function openQuotePopup(text = "Neues Zitat") {
             ids.push(i.getID());
         }
         saveLines();
-        Quotes.push(new Quote(createQuoteID(), ids));
+        Quotes.push(new Quote(createQuoteID(), ids, false));
         saveQuotes();
         closePopup();
         saveAll();
