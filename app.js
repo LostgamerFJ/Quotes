@@ -643,7 +643,7 @@ export function renderCollapsibles(){
         document.getElementById("categoryThingy").appendChild(Unassigned);
         for (let missed of Quotes){
             if (!QuotesDone.includes(missed)){
-                const newQuote = document.createElement("p");
+                const newQuote = document.createElement("div");
                 const lines = missed.getLines();
                 let tempQuotes = "";
                 if (Debug){
@@ -666,7 +666,7 @@ export function renderCollapsibles(){
                 } else {
                     if (lines.length > 1){
                         for (let lins of lines){
-                            tempQuotes += `<p>Unassigned: ${lins.assembleMultiple()}</p>`
+                            tempQuotes += `<p>Unassigned${lins.assembleMultiple()}</p>`
                         }
                         newQuote.innerHTML = tempQuotes;
                     } else{
