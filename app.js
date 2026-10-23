@@ -562,13 +562,23 @@ export function renderCollapsibles(){
 
         const content = document.getElementById(`quotes${PID}`)
         let quotesDone = 0;
+        let HiddenQuotes = [];
         for (let quotes of collectQuotes(PID)){
-            if (quotes.isHidden()){continue}
+            if (quotes.isHidden()){
+                HiddenQuotes.push(quotes);
+                continue;
+            }
             quotesDone ++;
             const newQuote = document.createElement("div");
             newQuote.id = `Quote${quotes.getID()}`
             const lines = quotes.getLines();
             let tempQuotes = "";
+            let hiddenCount = 0;
+            for (let quts of collectQuotes(PID)){
+                if (quts.isHidden()){
+                    hiddenCount++;
+                }
+            }
             if (Debug){
                 if (lines.length > 1){
                     tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
@@ -587,7 +597,7 @@ export function renderCollapsibles(){
                     `;
                 }                
                 
-                if (quotesDone != collectQuotes(PID).length){
+                if (quotesDone != collectQuotes(PID).length - hiddenCount){
                     newQuote.innerHTML += `<hr>`
                 }
 
@@ -619,6 +629,55 @@ export function renderCollapsibles(){
             //newQuote.addEventListener('click', handleQuoteEditClick); Quote Popup to edit goes here
 
             content.appendChild(newQuote);
+        }
+
+        if (HiddenQuotes.length > 0 && Debug){
+            const hiddenQuotesDiv = document.createElement("div");
+            hiddenQuotesDiv.append(document.createElement("br"))
+            const newP = document.createElement("p")
+            newP.innerHTML = "<b>Hidden: </b>"
+            hiddenQuotesDiv.append(newP)
+            let tempHidden = "";
+            let hiddenQuotesDone = 0;
+            for (let HQ of HiddenQuotes){
+                hiddenQuotesDone ++;
+                const newHiddenQuote = document.createElement("div");
+                newHiddenQuote.id = `Quote${HQ.getID()}`
+                const lines = HQ.getLines();
+                if (lines.length > 1){
+                    tempHidden += `<p>QuoteID: ${HQ.getID()}</p>`
+                    for (let lins of lines){
+                        if (lins.getPerson().isEinschub()){
+                            tempHidden += `<p>LineID: ${lins.getID()} Typ: Einschub Text: ${lins.assembleMultiple()}</p>`
+                        } else {
+                            tempHidden += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                        }
+                    }
+                    newHiddenQuote.innerHTML = tempHidden;
+                } else{
+                    newHiddenQuote.innerHTML = `
+                        <p>QuoteID: ${HQ.getID()}</p>
+                        <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
+                    `;
+                }                
+                
+                if (hiddenQuotesDone != HiddenQuotes.length){
+                    newHiddenQuote.innerHTML += `<hr>`
+                }
+
+                if (!QuotesDone.includes(HQ)){
+                    QuotesDone.push(HQ);
+                }
+                hiddenQuotesDiv.appendChild(newHiddenQuote);
+            }
+
+            content.appendChild(hiddenQuotesDiv)
+        }
+
+        if (HiddenQuotes.length > 0){
+            for (let HQ of HiddenQuotes){
+                QuotesDone.push(HQ);
+            }
         }
 
         if (activePersonIDs.includes(String(PID))){
