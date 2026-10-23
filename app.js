@@ -178,7 +178,8 @@ async function getLoginEnabled() {
             method: "GET"
         });
     } catch (err) {
-        console.err('Fehler: ', err)
+        console.error('Fehler: ', err)
+        return
     }
 
     loginRequired = (await response.json()).enabled;
@@ -211,8 +212,12 @@ function handleOpenClick() {
     openQuotePopup();
 }
 
-function handleSaveAllClick() {
-    saveAll();
+async function handleSaveAllClick() {
+    try{
+        await saveAll();
+    } catch (err){
+        console.error(err);
+    }
 }
 
 function handeToggleDebugClick(){
@@ -285,8 +290,9 @@ async function handleLoginClick() {
         }
         let Fehlermeldung = document.createElement("p");
         Fehlermeldung.className = "LoginErr";
-        Fehlermeldung.textContent("Das hat nicht funktioniert. Versuche es entweder nochmal oder wende dich an Felix.");
-        document.getElementById("login").append();
+        Fehlermeldung.id = `LoginErr`
+        Fehlermeldung.innerHTML = "Das hat nicht funktioniert. Versuche es entweder nochmal oder wende dich an Felix.";
+        document.getElementById("login").append(Fehlermeldung);
         throw new Error(`Fehler beim Login: ${response.status}`);
     }
 }
@@ -441,7 +447,7 @@ function clearCollapsibles(){
     `;
 }
 
-function handlePersonEditClick(){
+function handlePersonEditClick(event){
     event.stopPropagation();
     openPersonPopup("Person bearbeiten", Persons.find(p => p.getID() == PersonEditBtn.id.replace("personEditBtn", "")));
 }
@@ -473,7 +479,9 @@ function handleMouseEnter(element) {
 
 function handleMouseLeave(element) {
     element.style.backgroundColor = '#eee';
-    PersonEditBtn ?? PersonEditBtn.removeEventListener("click", handlePersonEditClick);
+    if (PersonEditBtn != null){
+        PersonEditBtn.removeEventListener("click", handlePersonEditClick);
+    }
     PersonEditBtn = null;
     if (Debug){
         element.innerHTML = `

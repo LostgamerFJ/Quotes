@@ -122,7 +122,7 @@ export function openPersonPopup(text = "Neue Person", person = null) {
             } else{
                 if (p.getName() == editedPerson.getName(FirstName.value.trim(), LastName.value.trim(), Salutation.value.trim())){
                     openErrorPopup("Diese Person existiert bereits.");
-                    continue;
+                    return;
                 }
             }
         }

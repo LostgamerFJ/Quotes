@@ -56,7 +56,7 @@ export function openQuotePopup(text = "Neues Zitat") {
         closePopup();
     });
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
         const lines = collectLines();
         let ids = [];
         for (let i of lines){
@@ -66,7 +66,11 @@ export function openQuotePopup(text = "Neues Zitat") {
         Quotes.push(new Quote(createQuoteID(), ids, false));
         saveQuotes();
         closePopup();
-        saveAll();
+        try {
+            await saveAll();
+        } catch (err){
+            console.error(err);
+        }
         renderCollapsibles();
     });
 
