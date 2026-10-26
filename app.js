@@ -27,12 +27,14 @@ let LineCounter = null;
 let QuoteCounter = null;
 
 let Debug = false;
+let Admin = false;
 
 let newQuoteBtn = null;
 let saveAllBtn = null;
 let ToggleDebugBtn = null;
 let DemoBtn = null;
 let LoginBtn = null;
+let AdminLoginBtn = null;
 let PersonEditBtn = null;
 let tempBtn = null;
 
@@ -40,6 +42,9 @@ let loginRequired = true;
 const TOKEN_KEY = "quotesToken";
 let Token = localStorage.getItem(TOKEN_KEY);
 let loginSuccessful = Token !== null;
+const ADMIN_TOKEN_KEY = "adminTOken";
+let adminToken = localStorage.getItem(ADMIN_TOKEN_KEY)
+let adminLoginSuccessful = adminToken !== null;
 
 const imageCache = new Map();
 const PLACEHOLDER_URL = "./assets/Portrait_Placeholder.png";
@@ -58,6 +63,7 @@ async function preloadImage(picUrl) {
 
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ADMIN_TOKEN_KEY)
         location.reload();
     }
 
@@ -96,6 +102,7 @@ async function loadRoute(route) {
 
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ADMIN_TOKEN_KEY)
         location.reload();
     }
 
@@ -124,6 +131,7 @@ async function saveRoute(route, array) {
 
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ADMIN_TOKEN_KEY)
         location.reload();
     }
 
@@ -144,6 +152,7 @@ export async function uploadAvatar(file, filename) {
 
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ADMIN_TOKEN_KEY)
         location.reload();
     }
 
@@ -226,6 +235,39 @@ function handeToggleDebugClick(){
     renderCollapsibles();
 }
 
+async function handleAdminLoginClick(){
+    const pwd = document.getElementById("password").value;
+    const response = await fetch(`${WORKER_URL}/Admin`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: pwd }),
+    });
+
+
+    if (response.ok) {
+        Token = (await response.json()).token;
+        localStorage.setItem(ADMIN_TOKEN_KEY, Token);
+        adminLoginSuccessful = true;
+        await init();
+        switchState();
+        startUp();
+        renderCollapsibles();
+    } else {
+        if (document.getElementById("AdminLoginErr") != null){
+            document.getElementById("AdminLoginErr").remove();
+        }
+        let Fehlermeldung = document.createElement("p");
+        Fehlermeldung.className = "AdminLoginErr";
+        Fehlermeldung.id = `AdminLoginErr`
+        Fehlermeldung.innerHTML = "Das hat nicht funktioniert. Versuche es entweder nochmal oder wende dich an Felix.";
+        document.getElementById("AdminLogin").append(Fehlermeldung);
+        throw new Error(`Fehler beim Login: ${response.status}`);
+    }
+}
+
+/*
 function handleDemoClick() {
     Persons = []
     QuoteLines = []
@@ -259,13 +301,14 @@ function handleDemoClick() {
 
     renderCollapsibles();
 }
+*/
 
 function handleTempClick(){
     openErrorPopup("Test");
 }
 
-async function handleLoginClick() {
 
+async function handleLoginClick() {
     const pwd = document.getElementById("password").value;
     const response = await fetch(`${WORKER_URL}/Login`, {
         method: "POST",
@@ -279,7 +322,7 @@ async function handleLoginClick() {
     if (response.ok) {
         Token = (await response.json()).token;
         localStorage.setItem(TOKEN_KEY, Token);
-        loginSuccessful = true;
+        LoginSuccessful = true;
         await init();
         switchState();
         startUp();
@@ -299,7 +342,11 @@ async function handleLoginClick() {
 
 function switchState(){
     document.getElementById("loggedIn").classList.toggle("active");
-    document.getElementById("login").classList.toggle("active");
+    if (Admin){
+        document.getElementById("AdminLogin").classList.toggle("active");
+    } else {
+        document.getElementById("login").classList.toggle("active");
+    }
 }
 
 function startUp(){
@@ -307,7 +354,13 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     ToggleDebugBtn = document.getElementById("ToggleDebug");
     //DemoBtn = document.getElementById("DemoBtn");
-    tempBtn = document.getElementById("tempBtn")
+    tempBtn = document.getElementById("tempBtn");
+
+    if (Admin){
+        const ToggleAdminBtn = document.getElementById("ToggleAdmin");
+        ToggleAdminBtn.removeEventListener('click', () => {Admin = !Admin});
+        ToggleAdminBtn.addEventListener('click', () => {Admin = !Admin});
+    }
 
     newQuoteBtn.removeEventListener('click', handleOpenClick);
     newQuoteBtn.addEventListener('click', handleOpenClick);
@@ -449,7 +502,7 @@ function clearCollapsibles(){
 
 function handlePersonEditClick(event){
     event.stopPropagation();
-    openPersonPopup("Person bearbeiten", Persons.find(p => p.getID() == PersonEditBtn.id.replace("personEditBtn", "")));
+    openPersonPopup("Person bearbeiten", Persons.find(p => event.currentTarget.closest('.collapsible').dataset.pid == PersonEditBtn.id.replace("personEditBtn", "")));
 }
 
 function handleMouseEnter(element) {
@@ -530,21 +583,39 @@ export function renderCollapsibles(){
         const PID = h.getID();
         const PPic = resolveImageUrl(h.getSrc());
         const PName = h.getName();
-        const QCOunt = collectQuotes(PID).length;
-        if (QCOunt == 0) continue;
+        let hiddenCount = 0;
+            for (let quts of collectQuotes(PID)){
+                if (quts.isHidden()){
+                    hiddenCount++;
+                }
+            }
+        const QCOunt = collectQuotes(PID).length - hiddenCount;
+        if (QCOunt <= 0) continue;
         const newColl = document.createElement("div");
         newColl.id = `FullCollapsible${PID}`;
         newColl.className = "CollDiv"
         if (Debug){
-            newColl.innerHTML = `
-                <div class="collapsible" id="collapsible${PID}">
-                    <img src="${PPic}" height="50">
-                    <p class="name">ID: ${PID} ${PName}</p>
-                    <p class="quoteCount">${QCOunt}</p>
-                    <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
-                </div>
-                <div class="content" id="quotes${PID}"></div>
-            `;
+            if (Admin){
+                newColl.innerHTML = `
+                    <div class="collapsible" id="collapsible${PID}">
+                        <img src="${PPic}" height="50">
+                        <p class="name">ID: ${PID} ${PName}</p>
+                        <p class="quoteCount">${QCOunt}</p>
+                        <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
+                    </div>
+                    <div class="content" id="quotes${PID}"></div>
+                `;
+            } else {
+                newColl.innerHTML = `
+                    <div class="collapsible" id="collapsible${PID}">
+                        <img src="${PPic}" height="50">
+                        <p class="name">${PName}</p>
+                        <p class="quoteCount">${QCOunt}</p>
+                        <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
+                    </div>
+                    <div class="content" id="quotes${PID}"></div>
+                `;
+            }
         } else {
             newColl.innerHTML = `
                 <div class="collapsible" id="collapsible${PID}">
@@ -581,29 +652,42 @@ export function renderCollapsibles(){
             newQuote.id = `Quote${quotes.getID()}`
             const lines = quotes.getLines();
             let tempQuotes = "";
-            let hiddenCount = 0;
-            for (let quts of collectQuotes(PID)){
-                if (quts.isHidden()){
-                    hiddenCount++;
-                }
-            }
             if (Debug){
-                if (lines.length > 1){
-                    tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
-                    for (let lins of lines){
-                        if (lins.getPerson().isEinschub()){
-                            tempQuotes += `<p>LineID: ${lins.getID()} Typ: Einschub Text: ${lins.assembleMultiple()}</p>`
-                        } else {
-                            tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                if (Admin){
+                    if (lines.length > 1){
+                        tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
+                        for (let lins of lines){
+                            if (lins.getPerson().isEinschub()){
+                                tempQuotes += `<p>LineID: ${lins.getID()} Typ: Einschub Text: ${lins.assembleMultiple()}</p>`
+                            } else {
+                                tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                            }
                         }
+                        newQuote.innerHTML = tempQuotes;
+                    } else{
+                        newQuote.innerHTML = `
+                            <p>QuoteID: ${quotes.getID()}</p>
+                            <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
+                        `;
+                    }    
+                } else{ 
+                    if (lines.length > 1){
+                        tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
+                        for (let lins of lines){
+                            if (lins.getPerson().isEinschub()){
+                                tempQuotes += `<p>${lins.assembleMultiple()}</p>`
+                            } else {
+                                tempQuotes += `<p>${lins.getPerson().getName()}${lins.assembleMultiple()}</p>`
+                            }
+                        }
+                        newQuote.innerHTML = tempQuotes;
+                    } else{
+                        newQuote.innerHTML = `
+                            <p>QuoteID: ${quotes.getID()}</p>
+                            <p>${lines[0].assemble()}</p>
+                        `;
                     }
-                    newQuote.innerHTML = tempQuotes;
-                } else{
-                    newQuote.innerHTML = `
-                        <p>QuoteID: ${quotes.getID()}</p>
-                        <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
-                    `;
-                }                
+                }         
                 
                 if (quotesDone != collectQuotes(PID).length - hiddenCount){
                     newQuote.innerHTML += `<hr>`
@@ -645,9 +729,9 @@ export function renderCollapsibles(){
             const newP = document.createElement("p")
             newP.innerHTML = "<b>Hidden: </b>"
             hiddenQuotesDiv.append(newP)
-            let tempHidden = "";
             let hiddenQuotesDone = 0;
             for (let HQ of HiddenQuotes){
+                let tempHidden = "";
                 hiddenQuotesDone ++;
                 const newHiddenQuote = document.createElement("div");
                 newHiddenQuote.id = `Quote${HQ.getID()}`
@@ -682,7 +766,7 @@ export function renderCollapsibles(){
             content.appendChild(hiddenQuotesDiv)
         }
 
-        if (HiddenQuotes.length > 0){
+        if (HiddenQuotes.length > 0 && !Debug){
             for (let HQ of HiddenQuotes){
                 QuotesDone.push(HQ);
             }
@@ -713,6 +797,9 @@ export function renderCollapsibles(){
                 const newQuote = document.createElement("div");
                 const lines = missed.getLines();
                 let tempQuotes = "";
+                if (missed.isHidden()){
+                    continue;
+                }
                 if (Debug){
                     if (lines.length > 1){
                         tempQuotes += `<p>QuoteID: ${missed.getID()}</p>`
@@ -789,17 +876,28 @@ function collectQuotes(personID){
     return TempQuotes;
 }
 
-await getLoginEnabled()
-
-console.log("Login required:", loginRequired);
-console.log("Login successful:", loginSuccessful);
-
-if (loginRequired){
-    LoginBtn = document.getElementById("loginBtn");
-    LoginBtn.addEventListener('click', handleLoginClick);
+if (document.body.dataset.role == "Admin"){
+    Admin = true;
+} else {
+    Admin = false;
 }
 
-if (loginSuccessful || !loginRequired){
+
+if (Admin){
+    AdminLoginBtn = document.getElementById("adminLoginBtn");
+    AdminLoginBtn.addEventListener('click', handleAdminLoginClick);
+} else{
+    await getLoginEnabled()
+
+    console.log("Login required:", loginRequired);
+    console.log("Login successful:", loginSuccessful);
+
+    if (loginRequired){
+        LoginBtn = document.getElementById("loginBtn");
+        LoginBtn.addEventListener('click', handleLoginClick);
+    }
+}
+if (adminLoginSuccessful || loginSuccessful || !loginRequired){
     await init();
     renderCollapsibles();
     switchState();

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Zitate</title>
+        <link rel="icon" type="image/png" href="assets/Icon.png">
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body data-role="Admin">
+        <div id="AdminLogin" class="login active">
+            <label for="password">Passwort:</label>
+            <input type="password" id="password" name="password" required>
+            <button id="adminLoginBtn">OK</button>
+        </div>
+
+        <div id="loggedIn" class="loggedIn">
+            <div id="categoryThingy">
+                <div class="category">
+                    <p class="category-label">Lehrende</p>
+                    <div id="TeacherCollapsibles"></div>
+                </div>
+
+                <div class="category">
+                    <p class="category-label">Schüler*innen</p>
+                    <div id="StudentCollapsibles"></div>
+                </div>
+            </div>
+
+            <div id="bottom">
+                <button id="newQuoteBtn">Neues Zitat</button>
+                <button id="saveAllBtn">Speichern</button>
+                <button id="ToggleDebug">ToggleDebug</button>
+                <button id="ToggleAdmin">Toggle Admin View</button>
+            </div>
+        </div>
+
+        <script type="module" src="/app.js"></script>        
+    </body>
+
+</html>

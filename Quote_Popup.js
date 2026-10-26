@@ -62,14 +62,13 @@ export function openQuotePopup(text = "Neues Zitat") {
         for (let i of lines){
             ids.push(i.getID());
         }
-        saveLines();
         Quotes.push(new Quote(createQuoteID(), ids, false));
-        saveQuotes();
-        closePopup();
         try {
             await saveAll();
+            closePopup();
         } catch (err){
             console.error(err);
+            openErrorPopup("Fehler beim Speichern: " + err)
         }
         renderCollapsibles();
     });

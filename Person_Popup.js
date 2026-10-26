@@ -23,7 +23,7 @@ export function openPersonPopup(text = "Neue Person", person = null) {
                     <input class="avatar-uploader" type="file" id="AvatarInput" accept="image/*">
                 </div>
 
-                <div class="field">
+                <div class="field field-salutation">
                     <label for="SalutationDropdown">Anrede</label>
                     <select id="SalutationDropdown">
                         <option value="Herr" ${PSal === "Herr" ? "selected" : ""}>Herr</option>
@@ -31,15 +31,15 @@ export function openPersonPopup(text = "Neue Person", person = null) {
                         <option value="" ${!PSal ? "selected" : ""}>Keine Anrede</option>
                     </select>
                 </div>
-                <div class="field field-notes">
+                <div class="field field-first-name">
                     <label for="FirstName">Vorname</label>
                     <textarea rows="1" id="FirstName">${PFN}</textarea>
                 </div>
-                <div class="field field-notes">
+                <div class="field field-last-name">
                     <label for="LastName">Nachname</label>
                     <textarea rows="1" id="LastName">${PLN}</textarea>
                 </div>
-                <div class="field">
+                <div class="field field-tag">
                     <label for="TagDropdown">Typ</label>
                     <select id="TagDropdown">
                         <option value="Teacher" ${PTag === "Teacher" ? "selected" : ""}>Lehrer*in</option>
@@ -192,8 +192,13 @@ export function openPersonPopup(text = "Neue Person", person = null) {
         
 
         Persons.push(person);
-        savePersons();
-        closePopup();
+        try {
+            await savePersons();
+            closePopup();
+        } catch(err){
+            console.log(err)
+            openErrorPopup("Fehler beim Speichern: " + err)
+        }
     })
 }
 

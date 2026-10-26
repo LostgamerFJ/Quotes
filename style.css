@@ -149,12 +149,15 @@ body {
     margin-top: 28px;
 }
 
-.field {
+.field.active {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
+}
+.field {
+    display: none;
 }
 .field label {
     font-size: 12px;

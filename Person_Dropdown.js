@@ -90,6 +90,7 @@ export function createPersonDropdown(idSuffix) {
             toggleAvatar.hidden = false;
         } else if(person.isEinschub()){
             toggleAvatar.hidden = true;
+            
         }
         searchInput.value = personLabel(person);
         updateInputWidth(personLabel(person));
@@ -136,6 +137,7 @@ export function createPersonDropdown(idSuffix) {
 
     searchInput.addEventListener('input', () => {
         wrapper.dataset.selectedId = '';
+        openPanel();
     });
 
     document.addEventListener('click', (event) => {
