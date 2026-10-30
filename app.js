@@ -50,7 +50,7 @@ const imageCache = new Map();
 
 let PLACEHOLDER_URL
 if (!Admin){
-    PLACEHOLDER_URL = "Quotes/assets/Portrait_Placeholder.png";
+    PLACEHOLDER_URL = "https://lostgamerfj.github.io/Quotes/assets/Portrait_Placeholder.png";
 } else{
     PLACEHOLDER_URL = "Quotes/assets/Portrait_Placeholder.png"
 }
