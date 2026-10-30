@@ -136,19 +136,19 @@ function addLine(){
     newLine.className = 'field-line field-line-quote';
     newLine.id = `field-line${lineCount}`
     newLine.innerHTML = `
-        <div class="field field-person">
+        <div class="field field-person active">
             <label>Person</label>
             <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
         </div>
-        <div class="field field-notes">
+        <div class="field field-notes active">
             <label for="Notes${lineCount}">Notiz</label>
             <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
         </div>
-        <div class="field field-quote">
+        <div class="field field-quote active">
             <label for="Quote${lineCount}">Zitat</label>
             <textarea rows="1" id="Quote${lineCount}"></textarea>
         </div>
-        <div class="field field-context">
+        <div class="field field-context active">
             <label for="Context${lineCount}">Kontext</label>
             <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
         </div>
