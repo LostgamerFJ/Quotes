@@ -36,7 +36,6 @@ let DemoBtn = null;
 let LoginBtn = null;
 let AdminLoginBtn = null;
 let PersonEditBtn = null;
-let tempBtn = null;
 
 let loginRequired = true;
 const TOKEN_KEY = "quotesToken";
@@ -303,11 +302,6 @@ function handleDemoClick() {
 }
 */
 
-function handleTempClick(){
-    openErrorPopup("Test");
-}
-
-
 async function handleLoginClick() {
     const pwd = document.getElementById("password").value;
     const response = await fetch(`${WORKER_URL}/Login`, {
@@ -354,7 +348,6 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     ToggleDebugBtn = document.getElementById("ToggleDebug");
     //DemoBtn = document.getElementById("DemoBtn");
-    tempBtn = document.getElementById("tempBtn");
 
     if (Admin){
         const ToggleAdminBtn = document.getElementById("ToggleAdmin");
@@ -374,8 +367,6 @@ function startUp(){
     //DemoBtn.removeEventListener('click', handleDemoClick);
     //DemoBtn.addEventListener('click', handleDemoClick);
 
-    tempBtn.removeEventListener('click', handleTempClick)
-    tempBtn.addEventListener('click', handleTempClick)
 }
 
 async function init() {
