@@ -47,7 +47,7 @@ let adminToken = localStorage.getItem(ADMIN_TOKEN_KEY)
 let adminLoginSuccessful = adminToken !== null;
 
 const imageCache = new Map();
-const PLACEHOLDER_URL = "./assets/Portrait_Placeholder.png";
+const PLACEHOLDER_URL = "/Quotes/assets/Portrait_Placeholder.png";
 const WORKER_PICS_PREFIX = `${WORKER_URL}/Pics/`;
 
 function isWorkerImage(picUrl) {
