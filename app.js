@@ -361,8 +361,8 @@ function startUp(){
 
     if (Admin){
         const ToggleAdminBtn = document.getElementById("ToggleAdmin");
-        ToggleAdminBtn.removeEventListener('click', () => {Admin = !Admin});
-        ToggleAdminBtn.addEventListener('click', () => {Admin = !Admin});
+        ToggleAdminBtn.removeEventListener('click', () => {Admin = !Admin; renderCollapsibles()});
+        ToggleAdminBtn.addEventListener('click', () => {Admin = !Admin; renderCollapsibles()});
     }
 
     newQuoteBtn.removeEventListener('click', handleOpenClick);
@@ -508,7 +508,7 @@ function handlePersonEditClick(event){
 
 function handleMouseEnter(element) {
     element.style.backgroundColor = '#ccc';
-    if (Debug){
+    if (Debug && Admin){
         element.innerHTML = `
             <img src="${element.dataset.PPic}" height="50">
             <p class="name">ID: ${element.dataset.pid} ${element.dataset.name}</p>
@@ -537,7 +537,7 @@ function handleMouseLeave(element) {
         PersonEditBtn.removeEventListener("click", handlePersonEditClick);
     }
     PersonEditBtn = null;
-    if (Debug){
+    if (Debug && Admin){
         element.innerHTML = `
             <img src="${element.dataset.PPic}" height="50">
             <p class="name">ID: ${element.dataset.pid} ${element.dataset.name}</p>
