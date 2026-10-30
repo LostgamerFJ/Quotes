@@ -353,7 +353,11 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     ToggleDebugBtn = document.getElementById("ToggleDebug");
     //DemoBtn = document.getElementById("DemoBtn");
-    tempBtn = document.getElementById("tempBtn");
+    if (!Admin){
+        tempBtn = document.getElementById("tempBtn");
+        tempBtn.removeEventListener('click', handleTempClick)
+        tempBtn.addEventListener('click', handleTempClick)
+    }
 
     if (Admin){
         const ToggleAdminBtn = document.getElementById("ToggleAdmin");
@@ -372,9 +376,6 @@ function startUp(){
 
     //DemoBtn.removeEventListener('click', handleDemoClick);
     //DemoBtn.addEventListener('click', handleDemoClick);
-
-    tempBtn.removeEventListener('click', handleTempClick)
-    tempBtn.addEventListener('click', handleTempClick)
 
 }
 
