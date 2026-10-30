@@ -50,9 +50,9 @@ const imageCache = new Map();
 
 let PLACEHOLDER_URL
 if (!Admin){
-    PLACEHOLDER_URL = "/assets/Portrait_Placeholder.png";
+    PLACEHOLDER_URL = "Quotes/assets/Portrait_Placeholder.png";
 } else{
-    PLACEHOLDER_URL = "/Quotes/assets/Portrait_Placeholder.png"
+    PLACEHOLDER_URL = "Quotes/assets/Portrait_Placeholder.png"
 }
 const WORKER_PICS_PREFIX = `${WORKER_URL}/Pics/`;
 
