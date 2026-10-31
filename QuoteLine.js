@@ -2,16 +2,16 @@ import { Persons } from "./app.js";
 
 export class QuoteLine {
 
-    constructor(ID, PID, QUOTE, NOTES = null, CONTEXT = null){
+    constructor(ID, PID, QUOTE, NOTES = null, AFTER = null){
         this.id = ID;
         this.personId = PID;
-        this.notes = NOTES;
+        this.before = NOTES;
         this.quote = QUOTE;
-        this.context = CONTEXT;
+        this.after = AFTER;
     }
 
     static fromJSON(obj){
-        return new QuoteLine(obj.id, obj.personId, obj.quote, obj.notes, obj.context)
+        return new QuoteLine(obj.id, obj.personId, obj.quote, obj.before, obj.after)
     }
 
     getID() {
@@ -40,14 +40,14 @@ export class QuoteLine {
 
     assemble(){
         let QuoteString = "";
-        if (this.notes != null){
-            QuoteString += this.notes + " ";
+        if (this.before != null){
+            QuoteString += this.before + " ";
         }
         
         QuoteString += this.quote;
 
-        if (this.context != null){
-            QuoteString += " " + this.context;
+        if (this.after != null){
+            QuoteString += " " + this.after;
         }
 
         return QuoteString;
@@ -55,17 +55,19 @@ export class QuoteLine {
 
     assembleMultiple(){
         if (this.getPerson().isEinschub()){
-            return this.context;
+            return this.after;
         }
         let QuoteString = "";
-        if (this.notes != null){
-            QuoteString += this.notes + ": ";
+        if (this.before != null && this.quote != null){
+            QuoteString += this.before + ": ";
+        } else if (this.before != null && this.quote == null){
+            QuoteString += this.before + " ";
         }
         
         QuoteString += this.quote;
 
-        if (this.context != null){
-            QuoteString += " " + this.context;
+        if (this.after != null){
+            QuoteString += " " + this.after;
         }
 
         return QuoteString;

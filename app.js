@@ -701,7 +701,7 @@ export function renderCollapsibles(){
             } else {
                 if (lines.length > 1){
                     for (let lins of lines){
-                        tempQuotes += `<p>${lins.getPerson().getName()} ${lins.assembleMultiple()}</p>`
+                        tempQuotes += `<p>${lins.getPerson().getName()}${lins.assembleMultiple()}</p>`
                     }
                     newQuote.innerHTML = tempQuotes;
                 } else{

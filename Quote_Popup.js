@@ -96,13 +96,13 @@ function collectLines() {
 
     for (const suffix of personDropdowns.keys()) {
         const dropdown = personDropdowns.get(suffix);
-        const notesField = document.getElementById(`Notes${suffix}`);
+        const beforeField = document.getElementById(`Notes${suffix}`);
         const quoteField = document.getElementById(`Quote${suffix}`);
-        const contextField = document.getElementById(`Context${suffix}`);
+        const afterField = document.getElementById(`Context${suffix}`);
 
-        let notes;
+        let before;
         let quote;
-        let context
+        let after
 
         if (getSelectedPersonId(dropdown) == null){
             openErrorPopup("Bitte wähle eine Person aus.");
@@ -110,21 +110,21 @@ function collectLines() {
         }
         
         if (getSelectedPersonId(dropdown) == 0){
-            notes = notesField.value ? `(${notesField.value})` : null;
+            before = beforeField.value ? `(${beforeField.value})` : null;
             quote = quoteField.value ? `(${quoteField.value})` : null;
-            context = contextField.value ? `(${contextField.value})` : null; 
+            after = afterField.value ? `(${afterField.value})` : null; 
         } else {
-            notes = notesField.value ? `(${notesField.value})` : null;
+            before = beforeField.value ? `(${beforeField.value})` : null;
             quote = quoteField.value ? `"${quoteField.value}"` : null;
-            context = contextField.value ? `(${contextField.value})` : null;
+            after = afterField.value ? `(${afterField.value})` : null;
         }
 
-        if (notes == null && quote == null && context == null){
+        if (before == null && quote == null && after == null){
             openErrorPopup("Bitte gib ein Zitat, Notizen oder Kontext an.");
             throw new Error("No Quote, Notes and Context")
         }
 
-        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), quote, notes, context)
+        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), quote, before, after)
         QuoteLines.push(newLine);
         lines.push(newLine);
     }
@@ -140,17 +140,19 @@ function addLine(){
             <label>Person</label>
             <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
         </div>
-        <div class="field field-notes active">
-            <label for="Notes${lineCount}">Notiz</label>
-            <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
-        </div>
-        <div class="field field-quote active">
-            <label for="Quote${lineCount}">Zitat</label>
-            <textarea rows="1" id="Quote${lineCount}"></textarea>
-        </div>
-        <div class="field field-context active">
-            <label for="Context${lineCount}">Kontext</label>
-            <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
+        <div class="field-container">
+            <div class="field field-before active">
+                <label for="Notes${lineCount}">Notiz</label>
+                <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
+            </div>
+            <div class="field field-quote active">
+                <label for="Quote${lineCount}">Zitat</label>
+                <textarea rows="1" id="Quote${lineCount}"></textarea>
+            </div>
+            <div class="field field-after active">
+                <label for="Context${lineCount}">Kontext</label>
+                <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
+            </div>
         </div>
     `;
 
@@ -178,6 +180,6 @@ function removeLastLine(){
 }
 
 function autoResizeTextarea(textarea) {
-    textarea.style.height = 'auto';
+    textarea.style.height = 'auto'
     textarea.style.height = textarea.scrollHeight + 'px';
 }
