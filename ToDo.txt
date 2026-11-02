@@ -1,0 +1,9 @@
+Changable before & after
+Dynamic Person Popup
+Quote Editing
+Menu Buttons for: Dark Mode, List Mode, general settings
+Toggle visibility by Tag
+
+CHANGE ADMIN HTML
+
+Make Shit look nice

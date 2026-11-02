@@ -105,7 +105,7 @@ body {
     text-align: center;
 }
 
-.CollDiv {
+.FullColl {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -439,6 +439,15 @@ body {
     z-index: 1000;
 }
 
+.preview {
+    background: #eef6f5;
+    border-radius: 6px;
+    font-size: 14px;
+    padding: 1px 10px;
+    line-height: 1;
+    min-height: 20px;
+}
+
 .quoteCount {
     flex: 0.025;
     text-align: right;
@@ -474,6 +483,11 @@ body {
     transition: opacity 0.3s ease;
     color: #2c2c2c;
     font-size: 250%;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: row;
 }
 
 /* ===== ID selectors ===== */

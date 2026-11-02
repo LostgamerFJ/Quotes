@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quote line demo</title>
+<style>
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: #f4f5f6;
+    padding: 24px;
+    color: #2b2b2b;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 18px;
+    max-width: 680px;
+  }
+
+  /* Four columns: person | before | quote | after */
+  .row {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+  #lines .row { margin-bottom: 12px; }
+
+  .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12px;
+    color: #6b6b6b;
+    margin-bottom: 4px;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border: 1px solid #e0d6b8;
+    border-radius: 6px;
+    background: #fcf0d6;
+    color: #2b2b2b;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .field input    { height: 36px; }
+  .field textarea { height: 80px; resize: none; line-height: 1.4; }
+
+  /* The wrapper is the positioning anchor for the toggle button. */
+  .wrapper { position: relative; }
+
+  /* Extra right padding so the text never runs underneath the toggle. */
+  .wrapper textarea { padding-right: 38px; }
+
+  .toggle {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 26px;
+    height: 24px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #6b6b6b;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .actions { display: flex; gap: 8px; margin-top: 4px; }
+  .btn-seamless {
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #14827a;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-seamless:hover { background: #eef6f5; }
+
+  .preview-label { font-size: 12px; color: #6b6b6b; margin: 14px 0 4px; }
+  .preview {
+    background: #eef6f5;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 20px;
+  }
+  .preview div + div { margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <!-- All rows are inserted here by JavaScript -->
+  <div id="lines"></div>
+
+  <div class="actions">
+    <button type="button" class="btn-seamless" id="add-line">+ Zeile hinzufügen</button>
+    <button type="button" class="btn-seamless" id="remove-line">- Letzte Zeile entfernen</button>
+  </div>
+
+  <div class="preview-label">Vorschau</div>
+  <div class="preview" id="preview"></div>
+</div>
+
+<!-- Blueprint of one row. It is never shown itself; JS clones it for every new row.
+     No ids in here on purpose: ids must be unique, so each row finds its
+     elements by class, relative to the row. -->
+<template id="row-template">
+  <div class="row">
+
+    <div class="field">
+      <div class="field-header"><span>Person</span></div>
+      <input type="text" class="person-input">
+    </div>
+
+    <!-- data-location tells the script which location a toggle belongs to -->
+    <div class="field">
+      <div class="field-header"><span>Davor</span></div>
+      <div class="wrapper">
+        <textarea class="before-input"></textarea>
+        <button type="button" class="toggle" data-location="before"
+                aria-label="Art wechseln: Info oder Handlung"></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-header"><span>Zitat</span></div>
+      <textarea class="quote-input"></textarea>
+    </div>
+
+    <div class="field">
+      <div class="field-header"><span>Danach</span></div>
+      <div class="wrapper">
+        <textarea class="after-input"></textarea>
+        <button type="button" class="toggle" data-location="after"
+                aria-label="Art wechseln: Info oder Handlung"></button>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+  const linesContainer = document.getElementById("lines");
+  const rowTemplate = document.getElementById("row-template");
+  const preview = document.getElementById("preview");
+
+  // The only place that knows which characters belong to which kind.
+  // Switching to other characters later means editing only this object.
+  const STYLES = {
+    normal: { open: "(", close: ")" },
+    star:   { open: "*", close: "*" }
+  };
+
+  // One object per row. Each row keeps its OWN kinds, so toggling
+  // a button in one row can never change another row.
+  const rows = [];
+
+  // Wraps the text in the characters of its kind. Empty text stays empty.
+  function wrap(text, kind) {
+    const trimmed = text.trim();
+    if (!trimmed) return "";
+    const style = STYLES[kind];
+    return style.open + trimmed + style.close;
+  }
+
+  // Builds the finished text of a single row.
+  function buildLine(row) {
+    const quote = row.quoteInput.value.trim();
+    return [
+      wrap(row.beforeInput.value, row.kinds.before),
+      quote ? '"' + quote + '"' : "",
+      wrap(row.afterInput.value, row.kinds.after)
+    ].filter(part => part !== "").join(" ");
+  }
+
+  // Rebuilds the preview: one line per row, empty rows are skipped.
+  function renderPreview() {
+    preview.replaceChildren();
+    rows.forEach(row => {
+      const line = buildLine(row);
+      if (!line) return;
+
+      // textContent (not innerHTML): typed text is shown as text,
+      // so characters like < or & can never be interpreted as HTML.
+      const lineElement = document.createElement("div");
+      lineElement.textContent = line;
+      preview.appendChild(lineElement);
+    });
+  }
+
+  // Updates the button of one location in one row to match its kind.
+  function paintToggle(row, location) {
+    const isStar = row.kinds[location] === "star";
+    const button = row.element.querySelector('.toggle[data-location="' + location + '"]');
+
+    button.setAttribute("aria-pressed", String(isStar));
+    button.textContent = isStar ? "*" : "( )";
+  }
+
+  // Creates one row from the template and wires it up.
+  // "initial" is optional and only used to prefill the demo row.
+  function createRow(initial = {}) {
+    const element = rowTemplate.content.firstElementChild.cloneNode(true);
+
+    const row = {
+      element: element,
+      kinds: {
+        before: initial.beforeKind || "normal",
+        after: initial.afterKind || "normal"
+      },
+      personInput: element.querySelector(".person-input"),
+      beforeInput: element.querySelector(".before-input"),
+      quoteInput: element.querySelector(".quote-input"),
+      afterInput: element.querySelector(".after-input")
+    };
+
+    row.personInput.value = initial.person || "";
+    row.beforeInput.value = initial.before || "";
+    row.quoteInput.value = initial.quote || "";
+    row.afterInput.value = initial.after || "";
+
+    // One click handler per toggle. It only touches this row's kinds.
+    element.querySelectorAll(".toggle").forEach(button => {
+      const location = button.dataset.location;
+      paintToggle(row, location);
+
+      button.addEventListener("click", () => {
+        row.kinds[location] = row.kinds[location] === "normal" ? "star" : "normal";
+        paintToggle(row, location);
+        renderPreview();
+      });
+    });
+
+    [row.beforeInput, row.quoteInput, row.afterInput].forEach(field => {
+      field.addEventListener("input", renderPreview);
+    });
+
+    return row;
+  }
+
+  function addRow(initial) {
+    const row = createRow(initial);
+    rows.push(row);
+    linesContainer.appendChild(row.element);
+    renderPreview();
+  }
+
+  // Removes the last row but always keeps at least one.
+  function removeLastRow() {
+    if (rows.length <= 1) return;
+    const lastRow = rows.pop();
+    lastRow.element.remove();
+    renderPreview();
+  }
+
+  // Arrow function on purpose: passing addRow directly would hand it
+  // the click event as its "initial" argument.
+  document.getElementById("add-line").addEventListener("click", () => addRow());
+  document.getElementById("remove-line").addEventListener("click", removeLastRow);
+
+  // First row, prefilled so that both looks are visible right away.
+  addRow({
+    person: "Lena",
+    before: "hat von Fahrsicherheitstraining erzählt",
+    quote: "Das war echt stressig.",
+    after: "Macht Tauben-Geräusche",
+    afterKind: "star"
+  });
+</script>
+</body>
+</html>

@@ -43,9 +43,9 @@ export class QuoteLine {
         if (this.before != null){
             QuoteString += this.before + " ";
         }
-        
-        QuoteString += this.quote;
-
+        if (this.quote != null){
+            QuoteString += this.quote;
+        }
         if (this.after != null){
             QuoteString += " " + this.after;
         }
@@ -53,24 +53,30 @@ export class QuoteLine {
         return QuoteString;
     }
 
-    assembleMultiple(){
-        if (this.getPerson().isEinschub()){
-            return this.after;
+    assembleMultiple(preview = false){
+        if (preview == false){
+            if (this.getPerson().isEinschub()){
+                return this.after;
+            }
         }
         let QuoteString = "";
         if (this.before != null && this.quote != null){
-            QuoteString += this.before + ": ";
+            QuoteString += " " + this.before + ": ";
         } else if (this.before != null && this.quote == null){
             QuoteString += this.before + " ";
+        } else{
+            QuoteString += " ";
         }
         
-        QuoteString += this.quote;
+        if (this.quote != null){
+            QuoteString += this.quote;
+        }
 
         if (this.after != null){
             QuoteString += " " + this.after;
         }
 
-        return QuoteString;
+        return QuoteString == "" ? null : QuoteString;
     }
 
 }

@@ -1,5 +1,6 @@
 import { openPersonPopup } from "./Person_Popup.js";
 import { resolveImageUrl, Persons } from "./app.js";
+import { updatePreview } from "./Quote_Popup.js";
 
 function personLabel(person) {
     const firstPart = person.firstName ? person.firstName : person.salutation;
@@ -7,20 +8,8 @@ function personLabel(person) {
 }
 
 export function createPersonDropdown(idSuffix) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'person-dropdown';
+    const wrapper = document.getElementById('person-dropdown-template').content.firstElementChild.cloneNode(true);
     wrapper.id = `personDropdown${idSuffix}`;
-    wrapper.dataset.selectedId = '';
-    wrapper.innerHTML = `
-        <div class="person-dropdown-toggle">
-            <img class="person-dropdown-avatar" src="" alt="" hidden>
-            <input type="text" class="person-dropdown-input" placeholder="Bitte wählen" autocomplete="off">
-        </div>
-        <div class="person-dropdown-panel" hidden>
-            <ul class="person-dropdown-list" role="listbox"></ul>
-            <button type="button" class="person-dropdown-add">+ Neue Person hinzufügen</button>
-        </div>
-    `;
 
     const toggleAvatar = wrapper.querySelector('.person-dropdown-avatar');
     const searchInput = wrapper.querySelector('.person-dropdown-input');
@@ -89,9 +78,9 @@ export function createPersonDropdown(idSuffix) {
             toggleAvatar.src = resolveImageUrl(person.picUrl) || '';
             toggleAvatar.hidden = false;
         } else if(person.isEinschub()){
-            toggleAvatar.hidden = true;
-            
+            toggleAvatar.hidden = true;    
         }
+        updatePreview();
         searchInput.value = personLabel(person);
         updateInputWidth(personLabel(person));
     }
@@ -106,6 +95,7 @@ export function createPersonDropdown(idSuffix) {
             } else if(lastSelectedPerson.isEinschub()){
                 toggleAvatar.hidden = true;
             }
+            updatePreview();
             updateInputWidth(personLabel(lastSelectedPerson));
         } else {
             searchInput.value = '';

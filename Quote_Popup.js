@@ -1,7 +1,7 @@
 import { Quote } from "./Quote.js";
 import { createPersonDropdown, getSelectedPersonId } from "./Person_Dropdown.js";
 import { openErrorPopup } from "./Error_Popup.js";
-import { Quotes, createQuoteID, saveLines, saveQuotes, saveAll, renderCollapsibles, createLineID, QuoteLines } from "./app.js";
+import { Quotes, createQuoteID, saveAll, renderCollapsibles, createLineID, QuoteLines } from "./app.js";
 import { QuoteLine } from "./QuoteLine.js";
 
 let overlay = null;
@@ -10,6 +10,9 @@ let lineCount = 0;
 const personDropdowns = new Map();
 
 export function openQuotePopup(text = "Neues Zitat") {
+    if (document.querySelectorAll('.overlay').length > 0) {
+        return;
+    }
     lineCount = 0;
     personDropdowns.clear();
 
@@ -18,6 +21,11 @@ export function openQuotePopup(text = "Neues Zitat") {
     overlay.innerHTML = `
         <div class="quote-popup" id="quote-popup">
             <h2>${text}</h2>
+
+            <div class="preview-container">
+                <label for="preview">Vorschau:</label>
+                <div class="preview" id="preview"></div>
+            </div>
 
             <div class="left-action">
                 <button class="btn-seamless" id="extraFieldBtn">+ Weitere Zeile</button>
@@ -42,14 +50,17 @@ export function openQuotePopup(text = "Neues Zitat") {
 
     extraFieldBtn.addEventListener('click', () => {
         addLine();
+        updatePreview();
     });
 
     removeLineBtn.addEventListener('click', () => {
         removeLastLine();
+        updatePreview();
     });
 
     resetBtn.addEventListener('click', () => {
         reset();
+        updatePreview();
     });
 
     cancelBtn.addEventListener('click', () => {
@@ -74,6 +85,7 @@ export function openQuotePopup(text = "Neues Zitat") {
     });
 
     addLine();
+    updatePreview();
 }
 
 function closePopup() {
@@ -91,20 +103,21 @@ function mountPersonDropdown(idSuffix, slotElement) {
     personDropdowns.set(idSuffix, dropdown);
 }
 
-function collectLines() {
+function collectLines(preview = false) {
     const lines = [];
 
     for (const suffix of personDropdowns.keys()) {
         const dropdown = personDropdowns.get(suffix);
-        const beforeField = document.getElementById(`Notes${suffix}`);
-        const quoteField = document.getElementById(`Quote${suffix}`);
-        const afterField = document.getElementById(`Context${suffix}`);
+        const beforeField = document.getElementById(`Before-Field-${suffix}`);
+        const quoteField = document.getElementById(`Quote-Field-${suffix}`);
+        const afterField = document.getElementById(`After-Field-${suffix}`);
 
         let before;
         let quote;
         let after
 
-        if (getSelectedPersonId(dropdown) == null){
+        if (preview == false && getSelectedPersonId(dropdown) == null){
+            console.log(preview, getSelectedPersonId(dropdown))
             openErrorPopup("Bitte wähle eine Person aus.");
             throw new Error("No Person selected")
         }
@@ -119,51 +132,59 @@ function collectLines() {
             after = afterField.value ? `(${afterField.value})` : null;
         }
 
-        if (before == null && quote == null && after == null){
+        if (before == null && quote == null && after == null && preview == false){
             openErrorPopup("Bitte gib ein Zitat, Notizen oder Kontext an.");
-            throw new Error("No Quote, Notes and Context")
+            throw new Error("No Quote, Before or After")
         }
 
-        const newLine = new QuoteLine(createLineID(), getSelectedPersonId(dropdown), quote, before, after)
-        QuoteLines.push(newLine);
+        const newLine = new QuoteLine(preview == false ? createLineID() : "0", getSelectedPersonId(dropdown), quote, before, after)
+        if (preview == false){QuoteLines.push(newLine)};
         lines.push(newLine);
     }
     return lines;
 }
 
-function addLine(){
-    const newLine = document.createElement('div');
-    newLine.className = 'field-line field-line-quote';
-    newLine.id = `field-line${lineCount}`
-    newLine.innerHTML = `
-        <div class="field field-person active">
-            <label>Person</label>
-            <div class="person-dropdown-slot" id="personSlot${lineCount}"></div>
-        </div>
-        <div class="field-container">
-            <div class="field field-before active">
-                <label for="Notes${lineCount}">Notiz</label>
-                <textarea rows="1" id="Notes${lineCount}" placeholder="Optional"></textarea>
-            </div>
-            <div class="field field-quote active">
-                <label for="Quote${lineCount}">Zitat</label>
-                <textarea rows="1" id="Quote${lineCount}"></textarea>
-            </div>
-            <div class="field field-after active">
-                <label for="Context${lineCount}">Kontext</label>
-                <textarea rows="1" id="Context${lineCount}" placeholder="Optional"></textarea>
-            </div>
-        </div>
-    `;
+function assembleQuote(){
+    let lines = collectLines(true);
+    let tempQuotes = "";
+     if (lines.length > 1){
+        for (let lins of lines){
+            tempQuotes += `<p>${lins.getPerson() ? (lins.getPerson().getName() ? lins.getPerson().getName() + ": " : "") : ""}${lins.assembleMultiple(true).trim ? lins.assembleMultiple(true).trim() : ""}</p>`
+        }
+    } else{
+        tempQuotes += `<p>${lines[0].assemble().trim ? lines[0].assemble().trim() : ""}</p>`;
+    }
+    return tempQuotes == "<p></p>" ? "<p>Keine Vorschau verfügbar</p>" : tempQuotes;
+}
 
-    const leftAction = overlay.querySelector('.left-action');
-    leftAction.parentNode.insertBefore(newLine, leftAction);
+export function updatePreview(){
+    const preview = document.getElementById("preview");
+    preview.innerHTML = assembleQuote();
+}
+
+function addLine(){
+    const newLine = document.getElementById("line-template").content.firstElementChild.cloneNode(true);
+
+    newLine.id = `field-line-quote-${lineCount}`;
+    newLine.querySelector(`#personSlot-PLACEHOLDER`).id = `personSlot${lineCount}`;
+    newLine.querySelector('label[for="Before-PLACEHOLDER"]').htmlFor = `Before-Field-${lineCount}`;
+    newLine.querySelector(`#Before-PLACEHOLDER`).id = `Before-Field-${lineCount}`;
+    newLine.querySelector('label[for="Quote-PLACEHOLDER"]').htmlFor = `Quote-Field-${lineCount}`;
+    newLine.querySelector(`#Quote-PLACEHOLDER`).id = `Quote-Field-${lineCount}`;
+    newLine.querySelector('label[for="After-PLACEHOLDER"]').htmlFor = `After-Field-${lineCount}`;
+    newLine.querySelector(`#After-PLACEHOLDER`).id = `After-Field-${lineCount}`;
+
+    const preview = overlay.querySelector('.preview-container');
+    preview.parentNode.insertBefore(newLine, preview);
 
     const slot = newLine.querySelector(`#personSlot${lineCount}`);
     mountPersonDropdown(lineCount, slot);
 
     newLine.querySelectorAll('textarea').forEach(textarea => {
-        textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+        textarea.addEventListener('input', () => {
+            autoResizeTextarea(textarea)
+            updatePreview();
+        })
     });
     lineCount++;
 }

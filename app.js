@@ -592,41 +592,21 @@ export function renderCollapsibles(){
             }
         const QCOunt = collectQuotes(PID).length - hiddenCount;
         if (QCOunt <= 0) continue;
-        const newColl = document.createElement("div");
-        newColl.id = `FullCollapsible${PID}`;
-        newColl.className = "CollDiv"
-        if (Debug){
-            if (Admin){
-                newColl.innerHTML = `
-                    <div class="collapsible" id="collapsible${PID}">
-                        <img src="${PPic}" height="50">
-                        <p class="name">ID: ${PID} ${PName}</p>
-                        <p class="quoteCount">${QCOunt}</p>
-                        <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
-                    </div>
-                    <div class="content" id="quotes${PID}"></div>
-                `;
-            } else {
-                newColl.innerHTML = `
-                    <div class="collapsible" id="collapsible${PID}">
-                        <img src="${PPic}" height="50">
-                        <p class="name">${PName}</p>
-                        <p class="quoteCount">${QCOunt}</p>
-                        <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
-                    </div>
-                    <div class="content" id="quotes${PID}"></div>
-                `;
-            }
+        const newColl = document.getElementById("collapsible-template").content.firstElementChild.cloneNode(true);
+        if (Debug && Admin){
+            newColl.querySelector("#collapsible-PLACEHOLDER").id = `collapsible${PID}`;
+            newColl.querySelector(".person-avatar").src = PPic;
+            newColl.querySelector(".name").textContent = `ID: ${PID} ${PName}`;
+            newColl.querySelector(".quoteCount").textContent = QCOunt;
+            newColl.querySelector("#arrow-PLACEHOLDER").id = `arrow${PID}`;
+            newColl.querySelector("#quotes-PLACEHOLDER").id = `quotes${PID}`;
         } else {
-            newColl.innerHTML = `
-                <div class="collapsible" id="collapsible${PID}">
-                    <img src="${PPic}" height="50">
-                    <p class="name">${PName}</p>
-                    <p class="quoteCount">${QCOunt}</p>
-                    <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(180deg)" id="arrow${PID}">
-                </div>
-                <div class="content" id="quotes${PID}"></div>
-            `;
+            newColl.querySelector("#collapsible-PLACEHOLDER").id = `collapsible${PID}`;
+            newColl.querySelector(".person-avatar").src = PPic;
+            newColl.querySelector(".name").textContent = `${PName}`;
+            newColl.querySelector(".quoteCount").textContent = QCOunt;
+            newColl.querySelector("#arrow-PLACEHOLDER").id = `arrow${PID}`;
+            newColl.querySelector("#quotes-PLACEHOLDER").id = `quotes${PID}`;
         }
 
         colls.append(newColl);
@@ -651,73 +631,7 @@ export function renderCollapsibles(){
             quotesDone ++;
             const newQuote = document.createElement("div");
             newQuote.id = `Quote${quotes.getID()}`
-            const lines = quotes.getLines();
-            let tempQuotes = "";
-            if (Debug){
-                if (Admin){
-                    if (lines.length > 1){
-                        tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
-                        for (let lins of lines){
-                            if (lins.getPerson().isEinschub()){
-                                tempQuotes += `<p>LineID: ${lins.getID()} Typ: Einschub Text: ${lins.assembleMultiple()}</p>`
-                            } else {
-                                tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
-                            }
-                        }
-                        newQuote.innerHTML = tempQuotes;
-                    } else{
-                        newQuote.innerHTML = `
-                            <p>QuoteID: ${quotes.getID()}</p>
-                            <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
-                        `;
-                    }    
-                } else{ 
-                    if (lines.length > 1){
-                        tempQuotes += `<p>QuoteID: ${quotes.getID()}</p>`
-                        for (let lins of lines){
-                            if (lins.getPerson().isEinschub()){
-                                tempQuotes += `<p>${lins.assembleMultiple()}</p>`
-                            } else {
-                                tempQuotes += `<p>${lins.getPerson().getName()}${lins.assembleMultiple()}</p>`
-                            }
-                        }
-                        newQuote.innerHTML = tempQuotes;
-                    } else{
-                        newQuote.innerHTML = `
-                            <p>QuoteID: ${quotes.getID()}</p>
-                            <p>${lines[0].assemble()}</p>
-                        `;
-                    }
-                }         
-                
-                if (quotesDone != collectQuotes(PID).length - hiddenCount){
-                    newQuote.innerHTML += `<hr>`
-                }
-
-                if (!QuotesDone.includes(quotes)){
-                    QuotesDone.push(quotes);
-                }
-
-            } else {
-                if (lines.length > 1){
-                    for (let lins of lines){
-                        tempQuotes += `<p>${lins.getPerson().getName()}${lins.assembleMultiple()}</p>`
-                    }
-                    newQuote.innerHTML = tempQuotes;
-                } else{
-                    newQuote.innerHTML = `
-                        <p>${lines[0].assemble()}</p>
-                    `;
-                }
-
-                if (!QuotesDone.includes(quotes)){
-                    QuotesDone.push(quotes);
-                }
-
-                if (quotesDone != collectQuotes(PID).length){
-                    newQuote.innerHTML += `<hr>`
-                }
-            }
+            newQuote.innerHTML = assembleQuote(quotes, quotesDone, hiddenCount, PID);
 
             //newQuote.addEventListener('click', handleQuoteEditClick); Quote Popup to edit goes here
 
@@ -862,6 +776,87 @@ export function renderCollapsibles(){
             }
         });
     }
+}
+
+function assembleQuote(quote, quotesDone, hiddenCount, PID, preview = false){
+    const lines = quote.getLines();
+    let tempQuotes = "";
+    if (Debug){
+        if (Admin){
+            if (lines.length > 1){
+                tempQuotes += `<p>QuoteID: ${quote.getID()}</p>`
+                for (let lins of lines){
+                    if (lins.getPerson().isEinschub()){
+                        tempQuotes += `<p>LineID: ${lins.getID()} Typ: Einschub Text: ${lins.assembleMultiple()}</p>`
+                    } else {
+                        tempQuotes += `<p>LineID: ${lins.getID()} Person: ${lins.getPerson().getName()} Text: ${lins.assembleMultiple()}</p>`
+                    }
+                }
+            } else{
+                tempQuotes += `
+                    <p>QuoteID: ${quote.getID()}</p>
+                    <p>LineID: ${lines[0].getID()} Person: ${lines[0].getPerson().getName()} Text: ${lines[0].assemble()}</p>
+                `;
+            }    
+        } else{ 
+            if (lines.length > 1){
+                tempQuotes += `<p>QuoteID: ${quote.getID()}</p>`
+                for (let lins of lines){
+                    if (lins.getPerson().isEinschub()){
+                        tempQuotes += `<p>${lins.assembleMultiple()}</p>`
+                    } else {
+                        tempQuotes += `<p>${lins.getPerson().getName()}${lins.assembleMultiple()}</p>`
+                    }
+                }
+            } else{
+                tempQuotes += `
+                    <p>QuoteID: ${quote.getID()}</p>
+                    <p>${lines[0].assemble()}</p>
+                `;
+            }
+        }
+        
+        if(!preview){
+            if (quotesDone != collectQuotes(PID).length - hiddenCount){
+                tempQuotes += `<hr>`
+            }
+
+            if (!QuotesDone.includes(quote)){
+                QuotesDone.push(quote);
+            }
+        }
+
+    } else {
+        if (lines.length > 1){
+            for (let lins of lines){
+                tempQuotes += `<p>${lins.getPerson().getName()}${lins.assembleMultiple()}</p>`
+            }
+        } else{
+            tempQuotes += `
+                <p>${lines[0].assemble()}</p>
+            `;
+        }
+
+        if (!preview){
+            if (!QuotesDone.includes(quote)){
+                QuotesDone.push(quote);
+            }
+
+            if (quotesDone != collectQuotes(PID).length - hiddenCount){
+                tempQuotes += `<hr>`
+            }
+        }
+    }
+    return tempQuotes;
+}
+
+function findPersonByID(personID) {
+    for (let prsns of Persons){
+        if (prsns.getID() == personID){
+            return prsns;
+        }
+    }
+    return null;
 }
 
 function collectQuotes(personID){
