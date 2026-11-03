@@ -109,8 +109,10 @@ function collectLines(preview = false) {
     for (const suffix of personDropdowns.keys()) {
         const dropdown = personDropdowns.get(suffix);
         const beforeField = document.getElementById(`Before-Field-${suffix}`);
+        const beforeSign = document.querySelector(`.toggle[data-location="before"]`).dataset.sign;
         const quoteField = document.getElementById(`Quote-Field-${suffix}`);
         const afterField = document.getElementById(`After-Field-${suffix}`);
+        const afterSign = document.querySelector(`.toggle[data-location="after"]`).dataset.sign;
 
         let before;
         let quote;
@@ -123,13 +125,13 @@ function collectLines(preview = false) {
         }
         
         if (getSelectedPersonId(dropdown) == 0){
-            before = beforeField.value ? `(${beforeField.value})` : null;
+            before = beforeField.value ? `${beforeSign == "(" ? ("(" + beforeField.value + ")") : ("*" + beforeField.value + "*")}` : null;
             quote = quoteField.value ? `(${quoteField.value})` : null;
-            after = afterField.value ? `(${afterField.value})` : null; 
+            after = afterField.value ? `${afterSign == "(" ? ("(" + afterField.value + ")") : ("*" + afterField.value + "*")}` : null; 
         } else {
-            before = beforeField.value ? `(${beforeField.value})` : null;
+            before = beforeField.value ? `${beforeSign == "(" ? ("(" + beforeField.value + ")") : ("*" + beforeField.value + "*")}` : null;
             quote = quoteField.value ? `"${quoteField.value}"` : null;
-            after = afterField.value ? `(${afterField.value})` : null;
+            after = afterField.value ? `${afterSign == "(" ? ("(" + afterField.value + ")") : ("*" + afterField.value + "*")}` : null;
         }
 
         if (before == null && quote == null && after == null && preview == false){
@@ -149,13 +151,49 @@ function assembleQuote(){
     let tempQuotes = "";
      if (lines.length > 1){
         for (let lins of lines){
-            tempQuotes += `<p>${lins.getPerson() ? (lins.getPerson().getName() ? lins.getPerson().getName() + ": " : "") : ""}${lins.assembleMultiple(true).trim ? lins.assembleMultiple(true).trim() : ""}</p>`
+            tempQuotes += `<p>${lins.getPerson() ? (lins.getPerson().getName() ? lins.getPerson().getName() + ": " : "") : ""}${assembleMultiple(lins).trim() ? assembleMultiple(lins).trim() : ""}</p>`
         }
     } else{
-        tempQuotes += `<p>${lines[0].assemble().trim ? lines[0].assemble().trim() : ""}</p>`;
+        tempQuotes += `<p>${assemble(lines[0]).trim() ? assemble(lines[0]).trim() : ""}</p>`;
     }
     return tempQuotes == "<p></p>" ? "<p>Keine Vorschau verfügbar</p>" : tempQuotes;
 }
+
+function assemble(line){
+        let QuoteString = "";
+        if (line.before != null){
+            QuoteString += line.before + " ";
+        }
+        if (line.quote != null){
+            QuoteString += line.quote;
+        }
+        if (line.after != null){
+            QuoteString += " " + line.after;
+        }
+
+        return QuoteString;
+    }
+
+function assembleMultiple(line){
+        let QuoteString = "";
+        if (line.before != null && line.quote != null){
+            QuoteString += " " + line.before + ": ";
+        } else if (line.before != null && line.quote == null){
+            QuoteString += line.before + " ";
+        } else{
+            QuoteString += " ";
+        }
+        
+        if (line.quote != null){
+            QuoteString += line.quote;
+        }
+
+        if (line.after != null){
+            QuoteString += " " + line.after;
+        }
+
+        return QuoteString == "" ? null : QuoteString;
+    }
 
 export function updatePreview(){
     const preview = document.getElementById("preview");
@@ -169,16 +207,30 @@ function addLine(){
     newLine.querySelector(`#personSlot-PLACEHOLDER`).id = `personSlot${lineCount}`;
     newLine.querySelector('label[for="Before-PLACEHOLDER"]').htmlFor = `Before-Field-${lineCount}`;
     newLine.querySelector(`#Before-PLACEHOLDER`).id = `Before-Field-${lineCount}`;
+    const beforeBtn = newLine.querySelector('.toggle[data-location="before"]');
     newLine.querySelector('label[for="Quote-PLACEHOLDER"]').htmlFor = `Quote-Field-${lineCount}`;
     newLine.querySelector(`#Quote-PLACEHOLDER`).id = `Quote-Field-${lineCount}`;
     newLine.querySelector('label[for="After-PLACEHOLDER"]').htmlFor = `After-Field-${lineCount}`;
     newLine.querySelector(`#After-PLACEHOLDER`).id = `After-Field-${lineCount}`;
+    const afterBtn = newLine.querySelector('.toggle[data-location="after"]');
 
     const preview = overlay.querySelector('.preview-container');
     preview.parentNode.insertBefore(newLine, preview);
 
     const slot = newLine.querySelector(`#personSlot${lineCount}`);
     mountPersonDropdown(lineCount, slot);
+
+    beforeBtn.addEventListener('click', () => {
+        beforeBtn.textContent = beforeBtn.dataset.sign === "(" ? "*" : "( )";
+        beforeBtn.dataset.sign = beforeBtn.dataset.sign === "(" ? "*" : "(";
+        updatePreview();
+    });
+
+    afterBtn.addEventListener('click', () => {
+        afterBtn.textContent = afterBtn.dataset.sign === "(" ? "*" : "( )";
+        afterBtn.dataset.sign = afterBtn.dataset.sign === "(" ? "*" : "(";
+        updatePreview();
+    });
 
     newLine.querySelectorAll('textarea').forEach(textarea => {
         textarea.addEventListener('input', () => {

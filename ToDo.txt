@@ -1,4 +1,3 @@
-Changable before & after
 Dynamic Person Popup
 Quote Editing
 Menu Buttons for: Dark Mode, List Mode, general settings
