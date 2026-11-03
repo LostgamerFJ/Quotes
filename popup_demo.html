@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Demo: dynamic quote popup</title>
+<style>
+    body { font-family: sans-serif; max-width: 700px; margin: 2rem auto; }
+    .field-line-quote { display: grid; gap: .5rem; padding: .75rem; border: 1px solid #ccc; border-radius: 6px; margin-bottom: .75rem; }
+    .field label { display: block; font-size: .8rem; color: #555; }
+    .field textarea { width: 100%; box-sizing: border-box; }
+    .error { color: #b00020; }
+    pre { background: #f3f3f3; padding: .75rem; border-radius: 6px; }
+
+    /* STEP 3: the whole "dynamic" behaviour lives in these rules, no JavaScript needed. */
+
+    /* Einschub: hide notes and context */
+    .field-line-quote[data-type="einschub"] .field-notes,
+    .field-line-quote[data-type="einschub"] .field-context {
+        display: none;
+    }
+
+    /* Both labels exist in the HTML, CSS decides which one is visible */
+    .label-einschub { display: none; }
+    .field-line-quote[data-type="einschub"] .label-einschub { display: inline; }
+    .field-line-quote[data-type="einschub"] .label-quote { display: none; }
+</style>
+</head>
+<body>
+
+<h2>Neues Zitat</h2>
+
+<div id="quote-popup">
+    <div id="lines"></div>
+    <button id="addLineBtn">+ Weitere Zeile</button>
+    <button id="saveBtn">Speichern</button>
+    <p id="error" class="error"></p>
+    <pre id="output">(noch nichts gespeichert)</pre>
+</div>
+
+<script>
+    // ---------- fake data (stands in for Persons / QuoteLines from app.js) ----------
+    const persons = [
+        { id: 0, name: "Einschub", isEinschub: true },
+        { id: 1, name: "Herr Klumpner", isEinschub: false },
+        { id: 2, name: "Paula", isEinschub: false },
+    ];
+
+    const quoteLines = [];
+    let lineCounter = 0;
+
+    function createLineID() {
+        lineCounter++;
+        return lineCounter;
+    }
+
+    // ---------- dropdown (this part would live in Person_Dropdown.js) ----------
+    // The dropdown knows nothing about the popup. It only announces what was selected.
+    function createPersonDropdown() {
+        const wrapper = document.createElement("div");
+        wrapper.className = "person-dropdown";
+        wrapper.dataset.selectedId = "";
+
+        const select = document.createElement("select");
+        select.innerHTML = `<option value="">Bitte wählen</option>`
+            + persons.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
+        wrapper.appendChild(select);
+
+        select.addEventListener("change", () => {
+            const person = persons.find(p => String(p.id) === select.value) ?? null;
+            selectPerson(person);
+        });
+
+        // STEP 1: one place that changes the selection AND announces it.
+        // In the real dropdown the same dispatchEvent call belongs into
+        // selectPerson and resetToLastValidSelection (also into the "no selection" branch).
+        function selectPerson(person) {
+            wrapper.dataset.selectedId = person ? person.id : "";
+            wrapper.dispatchEvent(new CustomEvent("personchange", {
+                bubbles: true,            // lets the event travel up through all parent elements
+                detail: { person }        // person is null when nothing is selected
+            }));
+        }
+
+        return wrapper;
+    }
+
+    function getSelectedPersonId(wrapper) {
+        const id = wrapper.dataset.selectedId;
+        return id ? Number(id) : null;
+    }
+
+    // ---------- popup (this part would live in Quote_Popup.js) ----------
+    const popup = document.getElementById("quote-popup");
+    const linesContainer = document.getElementById("lines");
+    const errorElement = document.getElementById("error");
+    const output = document.getElementById("output");
+
+    // STEP 2: ONE listener for all lines, including lines that do not exist yet.
+    // The event bubbles up from the dropdown's wrapper to the popup.
+    popup.addEventListener("personchange", (event) => {
+        const line = event.target.closest(".field-line-quote");
+        if (!line) return;
+
+        const person = event.detail.person;
+        line.dataset.type = person && person.isEinschub ? "einschub" : "person";
+        // The textareas are NOT touched, so whatever was typed stays in them.
+    });
+
+    function addLine() {
+        const line = document.createElement("div");
+        line.className = "field-line-quote";
+        // Start state is set directly. A dropdown that has not been selected yet
+        // has not sent any event, so we must not rely on one.
+        line.dataset.type = "person";
+        line.innerHTML = `
+            <div class="field field-person">
+                <label>Person</label>
+                <div class="person-dropdown-slot"></div>
+            </div>
+            <div class="field field-notes">
+                <label>Notiz</label>
+                <textarea rows="1" placeholder="Optional"></textarea>
+            </div>
+            <div class="field field-quote">
+                <label>
+                    <span class="label-quote">Zitat</span>
+                    <span class="label-einschub">Einschub</span>
+                </label>
+                <textarea rows="1"></textarea>
+            </div>
+            <div class="field field-context">
+                <label>Kontext</label>
+                <textarea rows="1" placeholder="Optional"></textarea>
+            </div>
+        `;
+        line.querySelector(".person-dropdown-slot").appendChild(createPersonDropdown());
+        linesContainer.appendChild(line);
+    }
+
+    function fail(message) {
+        errorElement.textContent = message;
+        return null;
+    }
+
+    // STEP 4 + two phases.
+    // Returns the new QuoteLine objects, or null if anything is invalid.
+    function collectLines() {
+        errorElement.textContent = "";
+
+        // PHASE 1: read and validate. Only local objects are created here,
+        // nothing outside this function is changed. An error can simply return null.
+        const drafts = [];
+
+        for (const line of linesContainer.querySelectorAll(".field-line-quote")) {
+            const personId = getSelectedPersonId(line.querySelector(".person-dropdown"));
+            if (personId === null) {
+                return fail("Bitte wähle bei jeder Zeile eine Person aus.");
+            }
+
+            const notesText = line.querySelector(".field-notes textarea").value.trim();
+            const quoteText = line.querySelector(".field-quote textarea").value.trim();
+            const contextText = line.querySelector(".field-context textarea").value.trim();
+
+            if (line.dataset.type === "einschub") {
+                // Only the quote field counts. Notes and context may still contain
+                // leftovers from before the switch, they are ignored on purpose.
+                if (!quoteText) {
+                    return fail("Bitte gib einen Einschub-Text an.");
+                }
+                drafts.push({ personId, notes: null, quote: `(${quoteText})`, context: null });
+            } else {
+                if (!notesText && !quoteText && !contextText) {
+                    return fail("Bitte gib ein Zitat, Notizen oder Kontext an.");
+                }
+                drafts.push({
+                    personId,
+                    notes: notesText ? `(${notesText})` : null,
+                    quote: quoteText ? `"${quoteText}"` : null,
+                    context: contextText ? `(${contextText})` : null,
+                });
+            }
+        }
+
+        // PHASE 2: everything is valid, now IDs are handed out and data is created.
+        return drafts.map(draft => {
+            const newLine = { id: createLineID(), ...draft };
+            quoteLines.push(newLine);
+            return newLine;
+        });
+    }
+
+    document.getElementById("addLineBtn").addEventListener("click", addLine);
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+        const lines = collectLines();
+        if (lines === null) return; // error is already shown, popup stays open
+
+        output.textContent = JSON.stringify(lines, null, 2)
+            + `\n\nquoteLines.length = ${quoteLines.length}, lineCounter = ${lineCounter}`;
+    });
+
+    addLine();
+</script>
+
+</body>
+</html>
