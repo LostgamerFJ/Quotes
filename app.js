@@ -36,15 +36,14 @@ let DemoBtn = null;
 let LoginBtn = null;
 let AdminLoginBtn = null;
 let PersonEditBtn = null;
-let tempBtn = null;
 
 let loginRequired = true;
 const TOKEN_KEY = "quotesToken";
+let loginSuccessful = localStorage.getItem(TOKEN_KEY) ? true : false;
+const ADMIN_TOKEN_KEY = "adminToken";
+let adminLoginSuccessful = localStorage.getItem(ADMIN_TOKEN_KEY) ? true : false;
 let Token = localStorage.getItem(TOKEN_KEY);
-let loginSuccessful = Token !== null;
-const ADMIN_TOKEN_KEY = "adminTOken";
-let adminToken = localStorage.getItem(ADMIN_TOKEN_KEY)
-let adminLoginSuccessful = adminToken !== null;
+let adminToken = localStorage.getItem(ADMIN_TOKEN_KEY);
 
 const imageCache = new Map();
 const PLACEHOLDER_URL = "./assets/Portrait_Placeholder.png";
@@ -58,13 +57,14 @@ async function preloadImage(picUrl) {
     if (!isWorkerImage(picUrl) || imageCache.has(picUrl)) return;
 
     const response = await fetch(picUrl, {
-        headers: { "Authorization": `Bearer ${Token}` }
+        headers: { "Authorization": `Bearer ${Admin == true ? adminToken : Token}` }
     });
 
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(ADMIN_TOKEN_KEY)
-        location.reload();
+        openErrorPopup("Authorisation fehlgeschlagen. Lade die Seite neu und logge dich erneut ein.")
+        throw new Error("Authorization failed. Reload Page and Log in again.")
     }
 
     if (!response.ok) {
@@ -96,14 +96,15 @@ export function cacheUploadedImage(picUrl, file) {
 async function loadRoute(route) {
     const response = await fetch(`${WORKER_URL}/${route}`,{
         headers: {
-            "Authorization": `Bearer ${Token}`
+            "Authorization": `Bearer ${Admin == true ? adminToken : Token}`
         }
     });
 
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(ADMIN_TOKEN_KEY)
-        location.reload();
+        openErrorPopup("Authorisation fehlgeschlagen. Lade die Seite neu und logge dich erneut ein.")
+        throw new Error("Authorization failed. Reload Page and Log in again.")
     }
 
     if (!response.ok) {
@@ -124,7 +125,7 @@ async function saveRoute(route, array) {
         method: "PUT",
         headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${Token}`
+            "Authorization": `Bearer ${Admin == true ? adminToken : Token}`
          },
         body: formatArray(array),
     });
@@ -132,7 +133,8 @@ async function saveRoute(route, array) {
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(ADMIN_TOKEN_KEY)
-        location.reload();
+        openErrorPopup("Authorisation fehlgeschlagen. Lade die Seite neu und logge dich erneut ein.")
+        throw new Error("Authorization failed. Reload Page and Log in again.")
     }
 
     if (!response.ok) {
@@ -145,7 +147,7 @@ export async function uploadAvatar(file, filename) {
         method: "PUT",
         headers: { 
             "Content-Type": file.type,
-            "Authorization": `Bearer ${Token}`
+            "Authorization": `Bearer ${Admin == true ? adminToken : Token}`
         },
         body: file,
     });
@@ -153,10 +155,12 @@ export async function uploadAvatar(file, filename) {
     if (response.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(ADMIN_TOKEN_KEY)
-        location.reload();
+        openErrorPopup("Authorisation fehlgeschlagen. Lade die Seite neu und logge dich erneut ein.")
+        throw new Error("Authorization failed. Reload Page and Log in again.")
     }
 
     if (!response.ok) {
+        openErrorPopup("Hochladen fehlgeschlagen.")
         throw new Error(`Fehler beim Hochladen von ${filename}: ${response.status}`);
     }
 
@@ -247,8 +251,8 @@ async function handleAdminLoginClick(){
 
 
     if (response.ok) {
-        Token = (await response.json()).token;
-        localStorage.setItem(ADMIN_TOKEN_KEY, Token);
+        adminToken = (await response.json()).token;
+        localStorage.setItem(ADMIN_TOKEN_KEY, adminToken);
         adminLoginSuccessful = true;
         await init();
         switchState();
@@ -321,7 +325,7 @@ async function handleLoginClick() {
     if (response.ok) {
         Token = (await response.json()).token;
         localStorage.setItem(TOKEN_KEY, Token);
-        LoginSuccessful = true;
+        loginSuccessful = true;
         await init();
         switchState();
         startUp();
@@ -353,14 +357,9 @@ function startUp(){
     saveAllBtn = document.getElementById('saveAllBtn');
     ToggleDebugBtn = document.getElementById("ToggleDebug");
     //DemoBtn = document.getElementById("DemoBtn");
-    if (!Admin){
-        tempBtn = document.getElementById("tempBtn");
-        tempBtn.removeEventListener('click', handleTempClick)
-        tempBtn.addEventListener('click', handleTempClick)
-    }
 
     if (Admin){
-        const ToggleAdminBtn = document.getElementById("ToggleAdmin");
+        const ToggleAdminBtn = document.getElementById("ToggleAdminView");
         ToggleAdminBtn.removeEventListener('click', () => {Admin = !Admin; renderCollapsibles()});
         ToggleAdminBtn.addEventListener('click', () => {Admin = !Admin; renderCollapsibles()});
     }
@@ -552,7 +551,10 @@ function handleMouseLeave(element) {
             <img src="https://cdn-icons-png.flaticon.com/512/54/54817.png" height="10" style="margin-left: 10px; transform: rotate(${element.classList.contains("active") ? "0deg" : "180deg"})" id="arrow${element.dataset.pid}">
         `;
     }
+}
 
+function handleQuoteEditClick(quoteId) {
+    openQuotePopup("Zitat bearbeiten", Quotes.find(q => q.getID() == quoteId));
 }
 
 export function renderCollapsibles(){
@@ -632,10 +634,11 @@ export function renderCollapsibles(){
             const newQuote = document.createElement("div");
             newQuote.id = `Quote${quotes.getID()}`
             newQuote.innerHTML = assembleQuote(quotes, quotesDone, hiddenCount, PID);
-
-            //newQuote.addEventListener('click', handleQuoteEditClick); Quote Popup to edit goes here
+            newQuote.dataset.quoteId = quotes.getID();
 
             content.appendChild(newQuote);
+
+            newQuote.addEventListener('click', () => {handleQuoteEditClick(newQuote.dataset.quoteId)});
         }
 
         if (HiddenQuotes.length > 0 && Debug){
@@ -872,8 +875,22 @@ function collectQuotes(personID){
     return TempQuotes;
 }
 
+async function veryfyToken(){
+    let response;
+    try {
+        response = await fetch(`${WORKER_URL}/${Admin == true ? "Admin" : ""}Verify`, {
+            method: "POST",
+            body: JSON.stringify({ token: (Admin == true ? adminToken : Token) }),
+        });
+    } catch (err) {
+        console.error('Fehler: ', err)
+        return
+    }
+}
+
 if (document.body.dataset.role == "Admin"){
     Admin = true;
+
 } else {
     Admin = false;
 }
@@ -893,7 +910,7 @@ if (Admin){
         LoginBtn.addEventListener('click', handleLoginClick);
     }
 }
-if (adminLoginSuccessful || loginSuccessful || !loginRequired){
+if (!Admin && loginSuccessful || !Admin && !loginRequired || Admin && adminLoginSuccessful){
     await init();
     renderCollapsibles();
     switchState();

@@ -30,6 +30,18 @@ export class QuoteLine {
         }
     }
 
+    getBefore(){
+        return this.before.replace("(", "").replace(")", "").replace("*", "");
+    }
+
+    getQuote(){
+        return this.quote.replace(`\"`, "")
+    }
+
+    getAfter(){
+        return this.after.replace("(", "").replace(")", "").replace("*", "");
+    }
+
     changeID(newID){
         this.id = newID;
     }
@@ -40,13 +52,13 @@ export class QuoteLine {
 
     assemble(){
         let QuoteString = "";
-        if (this.before != null){
+        if (this.before != ""){
             QuoteString += this.before + " ";
         }
-        if (this.quote != null){
+        if (this.quote != ""){
             QuoteString += this.quote;
         }
-        if (this.after != null){
+        if (this.after != ""){
             QuoteString += " " + this.after;
         }
 
@@ -60,19 +72,21 @@ export class QuoteLine {
             }
         }
         let QuoteString = "";
-        if (this.before != null && this.quote != null){
+        if (this.before != "" && this.quote != ""){
             QuoteString += " " + this.before + ": ";
-        } else if (this.before != null && this.quote == null){
+        } else if (this.before != "" && this.quote == ""){
             QuoteString += this.before + " ";
-        } else{
+        } /*
+        else{
             QuoteString += " ";
         }
+            */
         
-        if (this.quote != null){
+        if (this.quote != ""){
             QuoteString += this.quote;
         }
 
-        if (this.after != null){
+        if (this.after != ""){
             QuoteString += " " + this.after;
         }
 

@@ -154,6 +154,7 @@ export function createPersonDropdown(idSuffix) {
 
     updateInputWidth('');
     
+    wrapper.selectPerson = selectPerson;
     return wrapper;
 }
 

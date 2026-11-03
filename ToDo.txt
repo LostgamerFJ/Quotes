@@ -1,5 +1,5 @@
 Dynamic Person Popup
-Quote Editing
+COLON ARANGING IN COLLAPSIBLES IS FUCKED AGAIN I HATE EVERYTHING
 Menu Buttons for: Dark Mode, List Mode, general settings
 Toggle visibility by Tag
 

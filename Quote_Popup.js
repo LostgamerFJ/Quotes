@@ -9,7 +9,7 @@ let lineCount = 0;
 
 const personDropdowns = new Map();
 
-export function openQuotePopup(text = "Neues Zitat") {
+export function openQuotePopup(text = "Neues Zitat", quote = null) {
     if (document.querySelectorAll('.overlay').length > 0) {
         return;
     }
@@ -84,7 +84,10 @@ export function openQuotePopup(text = "Neues Zitat") {
         renderCollapsibles();
     });
 
-    addLine();
+    quote ? quote.getLines().forEach(line => {
+        addLine(line);
+    }) : addLine();
+
     updatePreview();
 }
 
@@ -97,10 +100,11 @@ function reset() {
     openQuotePopup();
 }
 
-function mountPersonDropdown(idSuffix, slotElement) {
+function mountPersonDropdown(idSuffix, slotElement, person = null) {
     const dropdown = createPersonDropdown(idSuffix);
     slotElement.appendChild(dropdown);
     personDropdowns.set(idSuffix, dropdown);
+    person ? dropdown.selectPerson(person) : null ;
 }
 
 function collectLines(preview = false) {
@@ -176,9 +180,7 @@ function assemble(line){
 
 function assembleMultiple(line){
         let QuoteString = "";
-        if (line.before != null && line.quote != null){
-            QuoteString += " " + line.before + ": ";
-        } else if (line.before != null && line.quote == null){
+        if (line.before != null && line.quote == null){
             QuoteString += line.before + " ";
         } else{
             QuoteString += " ";
@@ -200,7 +202,7 @@ export function updatePreview(){
     preview.innerHTML = assembleQuote();
 }
 
-function addLine(){
+function addLine(line = null){
     const newLine = document.getElementById("line-template").content.firstElementChild.cloneNode(true);
 
     newLine.id = `field-line-quote-${lineCount}`;
@@ -218,7 +220,7 @@ function addLine(){
     preview.parentNode.insertBefore(newLine, preview);
 
     const slot = newLine.querySelector(`#personSlot${lineCount}`);
-    mountPersonDropdown(lineCount, slot);
+    mountPersonDropdown(lineCount, slot, line ? line.getPerson() : null);
 
     beforeBtn.addEventListener('click', () => {
         beforeBtn.textContent = beforeBtn.dataset.sign === "(" ? "*" : "( )";
@@ -238,6 +240,30 @@ function addLine(){
             updatePreview();
         })
     });
+
+    if (line != null){
+        if (line.getBefore() != null){
+            document.getElementById(`Before-Field-${lineCount}`).value = line.getBefore();
+            autoResizeTextarea(document.getElementById(`Before-Field-${lineCount}`));
+        } else {
+            document.getElementById(`Before-Field-${lineCount}`).value = "";
+        }
+
+        if (line.getQuote() != null){
+            document.getElementById(`Quote-Field-${lineCount}`).value = line.getQuote();
+            autoResizeTextarea(document.getElementById(`Quote-Field-${lineCount}`));
+        } else {
+            document.getElementById(`Quote-Field-${lineCount}`).value = "";
+        }
+
+        if (line.getAfter() != null){
+            document.getElementById(`After-Field-${lineCount}`).value = line.getAfter();
+            autoResizeTextarea(document.getElementById(`After-Field-${lineCount}`));
+        } else {
+            document.getElementById(`After-Field-${lineCount}`).value = "";
+        }
+    }
+    
     lineCount++;
 }
 
