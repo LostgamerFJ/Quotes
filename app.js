@@ -641,7 +641,7 @@ export function renderCollapsibles(){
             newQuote.addEventListener('click', () => {handleQuoteEditClick(newQuote.dataset.quoteId)});
         }
 
-        if (HiddenQuotes.length > 0 && Debug){
+        if (HiddenQuotes.length > 0 && Debug && Admin){
             const hiddenQuotesDiv = document.createElement("div");
             hiddenQuotesDiv.append(document.createElement("br"))
             const newP = document.createElement("p")
@@ -682,9 +682,7 @@ export function renderCollapsibles(){
             }
 
             content.appendChild(hiddenQuotesDiv)
-        }
-
-        if (HiddenQuotes.length > 0 && !Debug){
+        } else {
             for (let HQ of HiddenQuotes){
                 QuotesDone.push(HQ);
             }
@@ -853,7 +851,7 @@ function assembleQuote(quote, quotesDone, hiddenCount, PID, preview = false){
     return tempQuotes;
 }
 
-function findPersonByID(personID) {
+export function findPersonByID(personID) {
     for (let prsns of Persons){
         if (prsns.getID() == personID){
             return prsns;

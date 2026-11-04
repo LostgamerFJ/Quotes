@@ -75,12 +75,10 @@ export class QuoteLine {
         if (this.before != "" && this.quote != ""){
             QuoteString += " " + this.before + ": ";
         } else if (this.before != "" && this.quote == ""){
-            QuoteString += this.before + " ";
-        } /*
-        else{
-            QuoteString += " ";
+            QuoteString += ": " +  this.before;
+        } else if (this.before == "" && this.quote != ""){
+            QuoteString += ": ";
         }
-            */
         
         if (this.quote != ""){
             QuoteString += this.quote;

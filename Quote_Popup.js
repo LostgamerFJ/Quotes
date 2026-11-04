@@ -1,7 +1,7 @@
 import { Quote } from "./Quote.js";
 import { createPersonDropdown, getSelectedPersonId } from "./Person_Dropdown.js";
 import { openErrorPopup } from "./Error_Popup.js";
-import { Quotes, createQuoteID, saveAll, renderCollapsibles, createLineID, QuoteLines } from "./app.js";
+import { Quotes, createQuoteID, saveAll, renderCollapsibles, createLineID, QuoteLines, findPersonByID } from "./app.js";
 import { QuoteLine } from "./QuoteLine.js";
 
 let overlay = null;
@@ -47,6 +47,7 @@ export function openQuotePopup(text = "Neues Zitat", quote = null) {
     const resetBtn = document.getElementById("resetBtn");
     const cancelBtn = document.getElementById("closeXBtn");
     const saveBtn = document.getElementById("saveBtn");
+    const quotePopup = document.getElementById("quote-popup");
 
     extraFieldBtn.addEventListener('click', () => {
         addLine();
@@ -83,6 +84,15 @@ export function openQuotePopup(text = "Neues Zitat", quote = null) {
         }
         renderCollapsibles();
     });
+
+    quotePopup.addEventListener("personchange", (event) => {
+        const line = event.target.closest(".field-line-quote");
+        if (!line) return;
+
+        const person = event.detail.person;
+        line.dataset.type = (person && person.isEinschub()) ? "einschub" : "person";
+        line.dataset.type == "einschub" ? (line.querySelector(".Quote-Label").textContent = "Einschub") : line.querySelector(".Quote-Label").textContent = "Zitat"
+    })
 
     quote ? quote.getLines().forEach(line => {
         addLine(line);
@@ -160,7 +170,7 @@ function assembleQuote(){
     } else{
         tempQuotes += `<p>${assemble(lines[0]).trim() ? assemble(lines[0]).trim() : ""}</p>`;
     }
-    return tempQuotes == "<p></p>" ? "<p>Keine Vorschau verfügbar</p>" : tempQuotes;
+    return tempQuotes.replaceAll("<p>", "").replaceAll("</p>", "") == "" ? "<p>Keine Vorschau verfügbar</p>" : tempQuotes;
 }
 
 function assemble(line){
@@ -221,6 +231,32 @@ function addLine(line = null){
 
     const slot = newLine.querySelector(`#personSlot${lineCount}`);
     mountPersonDropdown(lineCount, slot, line ? line.getPerson() : null);
+
+    const dropdown = newLine.querySelector(".person-dropdown")
+
+    const personLabel = newLine.querySelector(".person-label")
+    personLabel.addEventListener('click', () => {
+        dropdown.dataset.lastId = getSelectedPersonId(dropdown) == "0" ? "" : getSelectedPersonId(dropdown)
+        const lastPerson = findPersonByID(dropdown.dataset.lastId)
+        dropdown.selectPerson(findPersonByID("0"));
+        if (personLabel.innerHTML == "Person <b>↔</b> Einschub"){
+            personLabel.innerHTML = "Einschub <b>↔</b> Person"
+        } else {
+            personLabel.innerHTML = "Person <b>↔</b> Einschub";
+            personLabel.dispatchEvent(new CustomEvent("personchange", {
+                bubbles: true,
+                detail: { lastPerson }
+            }))
+            if (dropdown.dataset.lastId != ""){
+                dropdown.selectPerson(findPersonByID(dropdown.dataset.lastId))
+            } else {
+                dropdown.querySelector(".person-dropdown-input").value = '';
+                dropdown.dataset.selectedId = '';
+                dropdown.querySelector('.person-dropdown-avatar').hidden = true;
+                dropdown.updateInputWidth('');
+            }
+        }
+    });
 
     beforeBtn.addEventListener('click', () => {
         beforeBtn.textContent = beforeBtn.dataset.sign === "(" ? "*" : "( )";

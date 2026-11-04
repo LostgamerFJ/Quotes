@@ -44,30 +44,30 @@ export function createPersonDropdown(idSuffix) {
         }
 
         filteredPersons.forEach(person => {
-            const item = document.createElement('li');
-            item.className = 'person-dropdown-item';
-            item.setAttribute('role', 'option');
-            item.dataset.id = person.id;
+            if (!person.isEinschub()){
+                const item = document.createElement('li');
+                item.className = 'person-dropdown-item';
+                item.setAttribute('role', 'option');
+                item.dataset.id = person.id;
 
-            if (!person.isEinschub()) {
                 const img = document.createElement('img');
                 img.src = resolveImageUrl(person.picUrl) || '';
                 img.alt = '';
                 item.appendChild(img);
+
+                const span = document.createElement('span');
+                span.textContent = personLabel(person);
+
+                
+                item.appendChild(span);
+
+                item.addEventListener('click', () => {
+                    selectPerson(person);
+                    closePanel();
+                });
+
+                list.appendChild(item);
             }
-
-            const span = document.createElement('span');
-            span.textContent = personLabel(person);
-
-            
-            item.appendChild(span);
-
-            item.addEventListener('click', () => {
-                selectPerson(person);
-                closePanel();
-            });
-
-            list.appendChild(item);
         });
     }
 
@@ -83,6 +83,10 @@ export function createPersonDropdown(idSuffix) {
         updatePreview();
         searchInput.value = personLabel(person);
         updateInputWidth(personLabel(person));
+        wrapper.dispatchEvent(new CustomEvent("personchange", {
+                bubbles: true,
+                detail: { person }
+            }))
     }
 
     function resetToLastValidSelection() {
@@ -154,6 +158,7 @@ export function createPersonDropdown(idSuffix) {
 
     updateInputWidth('');
     
+    wrapper.updateInputWidth = updateInputWidth;
     wrapper.selectPerson = selectPerson;
     return wrapper;
 }

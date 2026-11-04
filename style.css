@@ -68,7 +68,7 @@ body {
     font-size: 14px;
     cursor: pointer;
 }
-.btn-seamless:hover { background: #eef6f5; }
+.btn-seamless:hover { background: #ffffff; }
 
 .category {
     display: flex;
@@ -149,15 +149,13 @@ body {
     margin-top: 28px;
 }
 
-.field.active {
+.field {
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
 }
-.field {
-    display: none;
-}
+
 .field label {
     font-size: 12px;
     color: var(--text-muted);
@@ -173,6 +171,14 @@ body {
     outline: 2px solid var(--teal);
     outline-offset: 1px;
 }
+
+.field-names {
+    display: flex;
+    flex-direction: row;
+    flex: 4;
+    gap: 14px;
+}
+
 .field select {
     padding: 9px 10px;
     border: 1px solid var(--border);
@@ -210,6 +216,11 @@ body {
     flex: 2;
 }
 
+.field-line-quote[data-type="einschub"] .field-before,
+.field-line-quote[data-type="einschub"] .field-after{
+    display: none;
+}
+
 .field-before {
     min-width: 75px;
     flex: 1.05;
@@ -221,6 +232,31 @@ body {
 
 .field-quote {
     flex: 4;
+}
+
+.field-tag {
+    flex: 0.39;
+}
+
+.field-line-person:has(#TagDropdown option[value="Teacher"]:checked) .field-first-name {
+    display: none;
+}
+
+.field-line-person:has(#TagDropdown option[value="Student"]:checked) .field-salutation {
+    display: none;
+}
+
+.field-salutation {
+    flex: 0.5;
+    
+}
+
+.field-first-name {
+    flex: 1;
+}
+
+.field-last-name {
+    flex: 1;
 }
 
 .field-line {

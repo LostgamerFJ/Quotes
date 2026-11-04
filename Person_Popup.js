@@ -23,7 +23,15 @@ export function openPersonPopup(text = "Neue Person", person = null) {
                     <input class="avatar-uploader" type="file" id="AvatarInput" accept="image/*">
                 </div>
 
-                <div class="field field-salutation active">
+                <div class="field field-tag">
+                    <label for="TagDropdown">Typ</label>
+                    <select id="TagDropdown">
+                        <option value="Teacher" ${PTag === "Teacher" ? "selected" : ""}>Lehrer*in</option>
+                        <option value="Student" ${PTag === "Student" ? "selected" : ""}>Schüler*in</option>
+                    </select>
+                </div>
+
+                <div class="field field-salutation">
                     <label for="SalutationDropdown">Anrede</label>
                     <select id="SalutationDropdown">
                         <option value="Herr" ${PSal === "Herr" ? "selected" : ""}>Herr</option>
@@ -31,21 +39,19 @@ export function openPersonPopup(text = "Neue Person", person = null) {
                         <option value="" ${!PSal ? "selected" : ""}>Keine Anrede</option>
                     </select>
                 </div>
-                <div class="field field-first-name active">
-                    <label for="FirstName">Vorname</label>
-                    <textarea rows="1" id="FirstName">${PFN}</textarea>
+
+                <div class="field field-names">
+                    <div class="field field-first-name">
+                        <label for="FirstName">Vorname</label>
+                        <textarea rows="1" id="FirstName">${PFN}</textarea>
+                    </div>
+                    
+                    <div class="field field-last-name">
+                        <label for="LastName">Nachname</label>
+                        <textarea rows="1" id="LastName">${PLN}</textarea>
+                    </div>
                 </div>
-                <div class="field field-last-name active">
-                    <label for="LastName">Nachname</label>
-                    <textarea rows="1" id="LastName">${PLN}</textarea>
-                </div>
-                <div class="field field-tag active">
-                    <label for="TagDropdown">Typ</label>
-                    <select id="TagDropdown">
-                        <option value="Teacher" ${PTag === "Teacher" ? "selected" : ""}>Lehrer*in</option>
-                        <option value="Student" ${PTag === "Student" ? "selected" : ""}>Schüler*in</option>
-                    </select>
-                </div>
+                
             </div>
 
             <div class="person-popup-footer">

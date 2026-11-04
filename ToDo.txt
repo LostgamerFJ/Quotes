@@ -1,8 +1,4 @@
-Dynamic Person Popup
-COLON ARANGING IN COLLAPSIBLES IS FUCKED AGAIN I HATE EVERYTHING
 Menu Buttons for: Dark Mode, List Mode, general settings
 Toggle visibility by Tag
-
-CHANGE ADMIN HTML
 
 Make Shit look nice
