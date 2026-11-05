@@ -35,6 +35,12 @@ body {
     left: 0%;
 }
 
+.bottom-footer {
+    position: fixed;
+    bottom: 0px;
+    z-index: 999;
+}
+
 .btn-primary {
     padding: 10px 20px;
     background: white;
@@ -263,6 +269,21 @@ body {
     display: flex;
     gap: 14px;
     margin-bottom: 20px;
+}
+
+.header {
+    background: #fcf0d6;
+    display: flex;
+}
+
+.header button{
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    margin-left: 11px;
+    margin-top: 11px;
+    margin-bottom: 11px;
+    display: flex;
 }
 
 .left-action {
@@ -578,15 +599,20 @@ body {
 
 /* ===== ID selectors ===== */
 #newQuoteBtn {
-    padding: 12px 22px;
-    background: var(--teal);
+    padding: 17px 17px;
+    background: #f374ff;
     border: none;
-    border-radius: 8px;
-    font-size: 15px;
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
     cursor: pointer;
+    bottom: 10px;
+    right: 10px;
+    z-index: 999;
+    position: fixed;
 }
 #newQuoteBtn:hover { 
-    background: var(--teal-dark); 
+    background: #b958c2; 
 }
 
 #TeacherCollapsibles,

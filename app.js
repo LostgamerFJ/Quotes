@@ -36,6 +36,7 @@ let DemoBtn = null;
 let LoginBtn = null;
 let AdminLoginBtn = null;
 let PersonEditBtn = null;
+let MenuBtn = null;
 
 let loginRequired = true;
 const TOKEN_KEY = "quotesToken";
@@ -366,6 +367,7 @@ function startUp(){
 
     newQuoteBtn.removeEventListener('click', handleOpenClick);
     newQuoteBtn.addEventListener('click', handleOpenClick);
+    newQuoteBtn.innerHTML = "<img src='assets/BlackCross.png'>"
 
     saveAllBtn.removeEventListener('click', handleSaveAllClick);
     saveAllBtn.addEventListener('click', handleSaveAllClick);
@@ -384,7 +386,6 @@ async function init() {
     } catch (err) {
         console.error('Konnte Daten nicht laden:', err);
     }
-
 }
 
 export function showImg(){
@@ -893,6 +894,8 @@ if (document.body.dataset.role == "Admin"){
     Admin = false;
 }
 
+MenuBtn = document.getElementById("menuBtn");
+MenuBtn.innerHTML = "<img src='assets/MenuBlack.png'>"
 
 if (Admin){
     AdminLoginBtn = document.getElementById("adminLoginBtn");

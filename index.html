@@ -8,6 +8,11 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body data-role="User">
+        <div class="header">
+            <button class="btn-seamless" id="menuBtn">
+            </button>
+        </div>
+
         <div id="login" class="login active">
             <label for="password">Passwort:</label>
             <input type="password" id="password" name="password" required>
@@ -27,14 +32,14 @@
                 </div>
             </div>
 
-            <div id="bottom">
-                <button id="newQuoteBtn">Neues Zitat</button>
+            <button id="newQuoteBtn"></button>
+
+            <div id="bottom" class="bottom-footer">
                 <button id="saveAllBtn">Speichern</button>
                 <button id="ToggleDebug">ToggleDebug</button>
                 <!--<button id="DemoBtn">DEMO</button>-->
             </div>
         </div>
-        
 
         <!--TEMPLATES-->
 
@@ -98,7 +103,7 @@
             </div>
         </template>
 
-        <script type="module" src="app.js"></script>        
+        <script type="module" src="app.js"></script>
     </body>
 
 </html>
