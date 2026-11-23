@@ -139,16 +139,16 @@ function collectLines(preview = false) {
         }
         
         if (getSelectedPersonId(dropdown) == 0){
-            before = beforeField.value ? `${beforeSign == "(" ? ("(" + beforeField.value + ")") : ("*" + beforeField.value + "*")}` : null;
-            quote = quoteField.value ? `(${quoteField.value})` : null;
-            after = afterField.value ? `${afterSign == "(" ? ("(" + afterField.value + ")") : ("*" + afterField.value + "*")}` : null; 
+            before = beforeField.value ? `${beforeSign == "(" ? ("(" + beforeField.value + ")") : ("*" + beforeField.value + "*")}` : "";
+            quote = quoteField.value ? `(${quoteField.value})` : "";
+            after = afterField.value ? `${afterSign == "(" ? ("(" + afterField.value + ")") : ("*" + afterField.value + "*")}` : ""; 
         } else {
-            before = beforeField.value ? `${beforeSign == "(" ? ("(" + beforeField.value + ")") : ("*" + beforeField.value + "*")}` : null;
-            quote = quoteField.value ? `"${quoteField.value}"` : null;
-            after = afterField.value ? `${afterSign == "(" ? ("(" + afterField.value + ")") : ("*" + afterField.value + "*")}` : null;
+            before = beforeField.value ? `${beforeSign == "(" ? ("(" + beforeField.value + ")") : ("*" + beforeField.value + "*")}` : "";
+            quote = quoteField.value ? `"${quoteField.value}"` : "";
+            after = afterField.value ? `${afterSign == "(" ? ("(" + afterField.value + ")") : ("*" + afterField.value + "*")}` : "";
         }
 
-        if (before == null && quote == null && after == null && preview == false){
+        if (before == "" && quote == "" && after == "" && preview == false){
             openErrorPopup("Bitte gib ein Zitat, Notizen oder Kontext an.");
             throw new Error("No Quote, Before or After")
         }
